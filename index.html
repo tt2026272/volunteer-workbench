@@ -118,6 +118,32 @@
   .major .schools{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
   .major .schools span{font-size:11.5px;background:#eef1fb;color:#4a56a0;padding:2px 8px;border-radius:6px}
 
+  /* 专业强校解读 */
+  .sub-block{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px 16px;margin-bottom:12px}
+  .sub-name{font-size:14px;font-weight:800;margin-bottom:9px;color:var(--text)}
+  .sub-row{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;margin-bottom:7px}
+  .sub-row .lvl-tag{font-size:11px;font-weight:800;color:#fff;padding:2px 7px;border-radius:5px;flex-shrink:0;margin-top:2px;height:20px;line-height:16px}
+  .lvl-tag.ap{background:var(--c985)}
+  .lvl-tag.a{background:var(--c211)}
+  .stag{font-size:12.5px;padding:2px 8px;border-radius:6px;background:#f1f3f9;color:#5a6478;line-height:1.5}
+  .stag.link{background:#eef1fb;color:var(--primary);cursor:pointer;border-bottom:1px dashed var(--primary)}
+  .stag.link:hover{background:var(--primary);color:#fff;border-bottom-color:transparent}
+  .flash{animation:flashAni 1s ease 2}
+  @keyframes flashAni{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 3px rgba(79,110,247,.45);background:#eef1fb}}
+  .catalog-gates{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+  .gate{border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;border-left:4px solid var(--gc);transition:.15s}
+  .gate:hover{box-shadow:0 4px 12px rgba(60,80,160,.1);transform:translateY(-1px)}
+  .gate .gno{font-size:11px;color:var(--muted);font-weight:700}
+  .gate .gname{font-size:15px;font-weight:800;color:var(--gc);margin:1px 0}
+  .gate .gcnt{font-size:11px;color:var(--muted)}
+  .classes-wrap{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+  .classes-title{font-size:13px;font-weight:700;margin-bottom:9px}
+  .classes{display:flex;flex-wrap:wrap;gap:7px}
+  .cls-chip{font-size:12.5px;padding:4px 10px;border-radius:7px;background:#f1f3f9;color:#5a6478;cursor:pointer}
+  .cls-chip:hover{background:#e6eaf5}
+  .cls-chip.has{background:#eef1fb;color:var(--primary);font-weight:700}
+  .cls-chip.has:hover{background:var(--primary);color:#fff}
+
   /* 模块3 清单 */
   .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
   .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
@@ -175,6 +201,11 @@
 
   <!-- 模块1：分省份高校解读 -->
   <section class="mod active" id="mod-m1">
+    <div class="card" style="margin-bottom:16px">
+      <div class="sec-title"><span class="bar"></span>全国公办本科院校分布</div>
+      <div class="sec-desc">点击图片查看高清大图（新窗口打开）。下方按省份查看各高校详细解读。</div>
+      <a href="院校分布图.jpg" target="_blank"><img src="院校分布图.jpg" alt="全国公办本科院校分布图" loading="lazy" style="width:100%;border-radius:12px;border:1px solid var(--line);cursor:zoom-in;display:block"></a>
+    </div>
     <div class="prov-switch" id="provSwitch"></div>
     <div class="subtabs" id="m1Tabs">
       <div class="tab active" data-t="indus">产业概览</div>
@@ -192,11 +223,17 @@
   <!-- 模块2：专业解读 -->
   <section class="mod" id="mod-m2">
     <div class="card" style="margin-bottom:16px">
-      <div class="sec-title"><span class="bar"></span>热门专业解读</div>
-      <div class="sec-desc">每个专业讲清楚：学什么、就业去哪、选科要求、适合谁、代表院校（模拟数据）。</div>
+      <div class="sec-title"><span class="bar"></span>专业体系总览 · 13 大门类</div>
+      <div class="sec-desc">点门类 → 展开专业类 → 点专业类看强校推荐（<b style="color:var(--primary)">带 ● 的类已有强校数据</b>）。</div>
+      <div class="catalog-gates" id="catalogGates"></div>
+      <div id="catalogClasses"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="sec-title"><span class="bar"></span>专业强校解读</div>
+      <div class="sec-desc">按软科 2026 排名 / 官方强校名单整理。点击<b style="color:var(--primary)">蓝色院校名</b>，可跳转到「分省份高校解读」查看该校详细介绍。</div>
       <div class="subtabs" id="majCat"></div>
     </div>
-    <div class="grid" id="majGrid"></div>
+    <div id="majGrid"></div>
   </section>
 
   <!-- 模块3：梯度选校清单 -->
@@ -241,6 +278,8 @@
   <footer>模拟版 · 数据为示例，请以院校官方及省考试院发布为准</footer>
 </div>
 
+<script src="data-prov.js"></script>
+<script src="data-manual.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 function lvColor(l){ if(l==="985")return"lv-985"; if(l==="211")return"lv-211"; if(l==="双一流")return"lv-syl"; if(l==="专科"||l==="职业本科")return"lv-zk"; if(l==="民办")return"lv-mb"; return"lv-pub"; }
@@ -365,20 +404,93 @@ const DATA = {
 };
 
 /* ============ 模块2：专业解读 ============ */
-const MAJORS = [
-  {n:"计算机科学与技术",cat:"工学",one:"互联网/软件行业核心专业，需求量最大",learn:"编程语言、数据结构与算法、操作系统、计算机网络、数据库、人工智能",job:"互联网大厂、软件研发、算法工程师、人工智能、国企信息化",xk:"首选物理（部分要求化学）",fit:"逻辑思维强、喜欢写代码、数学不错",schools:["清华","北大","浙大","北航","华科","哈工大(深圳)","北邮"]},
-  {n:"临床医学",cat:"医学",one:"医生的培养路径，八年制最优",learn:"人体解剖、生理生化、内科学、外科学、妇产儿科学、诊断学",job:"三甲医院、基层医疗、医学研究",xk:"物理 + 化学（多数要求）",fit:"有耐心、抗压、愿长期投入（5+3 甚至更长）",schools:["协和","北大","复旦","上交","中山","华西","湘雅"]},
-  {n:"法学",cat:"法学",one:"考公考编、律师、法务的敲门砖",learn:"法理学、宪法、民法、刑法、诉讼法、商法",job:"公检法、律师、企业法务、公务员",xk:"不限",fit:"记忆力好、文字表达强、目标公考",schools:["人大","中国政法","北大","清华","华政","武大","西南政法"]},
-  {n:"金融学",cat:"经济学",one:"银行证券基金等金融行业核心专业",learn:"宏微观经济、货币银行、证券投资、公司金融",job:"银行、券商、基金、保险、监管机构",xk:"不限（部分要求物理）",fit:"数学好、对数字敏感、想进金融圈",schools:["北大","清华","人大","上财","央财","复旦","南开"]},
-  {n:"电气工程及其自动化",cat:"工学",one:"进国家电网的「硬通货」专业",learn:"电路、电机学、电力系统、继电保护、高电压技术",job:"国家电网、南方电网、发电集团、电气设备",xk:"物理",fit:"物理好、目标电网央企",schools:["华科","西安交大","清华","华北电力","上海电力","三峡大学"]},
-  {n:"机械设计制造及其自动化",cat:"工学",one:"制造业基础，对接汽车、装备、机器人",learn:"机械原理、机械设计、材料力学、控制工程、CAD",job:"汽车、装备制造、机器人、航空航天",xk:"物理",fit:"空间想象好、喜欢动手、目标制造业",schools:["上交","华科","清华","哈工大","湖南大学","燕山大学"]},
-  {n:"电子信息类",cat:"工学",one:"芯片、通信、智能硬件的基础专业",learn:"电路、信号与系统、通信原理、微电子、嵌入式",job:"华为、中兴、芯片设计、通信、消费电子",xk:"物理",fit:"物理好、想进 ICT 行业",schools:["电子科大","西电","清华","北大","东南大学","北邮"]},
-  {n:"汉语言文学",cat:"文学",one:"考编当老师、考公的热门文科专业",learn:"文学史、语言学、写作、古代/现当代文学",job:"中小学教师、公务员、媒体、编辑",xk:"不限",fit:"语文好、想当老师或考公",schools:["北师大","北大","华东师大","复旦","南大","华中师大"]},
-  {n:"药学",cat:"医学",one:"医药行业研发、生产、流通环节",learn:"药物化学、药理学、药剂学、药物分析",job:"药企研发、医院药房、药监、医药流通",xk:"物理 + 化学",fit:"化学好、想进医药行业",schools:["中国药科大学","北大","复旦","中山","川大"]},
-  {n:"会计学",cat:"管理学",one:"每个企业都需要的「万金油」商科",learn:"会计学原理、财务会计、审计、税法、财务管理",job:"会计师事务所、企业财务、银行、审计",xk:"不限",fit:"细心、数字敏感、求稳",schools:["厦大","上财","央财","东北财大","中南财经政法"]},
+if(window.DATA_PROV) Object.assign(DATA, window.DATA_PROV);
+if(window.DATA_MANUAL) for(const k in window.DATA_MANUAL){ if(!DATA[k])DATA[k]={}; Object.assign(DATA[k], window.DATA_MANUAL[k]); }
+const MAJOR_GROUPS = [
+  {name:"航空航天类", subs:[
+    {sub:"航空航天工程", ap:"清华大学、西北工业大学", a:""},
+    {sub:"飞行器设计与工程", ap:"北京航空航天大学、西北工业大学", a:"哈尔滨工业大学"},
+    {sub:"飞行器制造工程", ap:"西北工业大学、哈尔滨工业大学", a:"北京航空航天大学、南京航空航天大学"},
+    {sub:"飞行器动力工程", ap:"北京航空航天大学、西北工业大学", a:"哈尔滨工业大学"},
+    {sub:"飞行器环境与生命保障工程", ap:"北京航空航天大学、哈尔滨工业大学", a:""},
+    {sub:"飞行器质量与可靠性", ap:"北京航空航天大学、沈阳航空航天大学", a:""},
+    {sub:"飞行器适航技术", ap:"北京航空航天大学、南京航空航天大学", a:""},
+    {sub:"飞行器控制与信息工程", ap:"北京航空航天大学、西北工业大学", a:""},
+    {sub:"无人驾驶航空器系统工程", ap:"北京航空航天大学、南京航空航天大学", a:"电子科技大学、中国民航大学"},
+    {sub:"智能飞行器技术", ap:"北京航空航天大学、南京航空航天大学", a:""},
+    {sub:"空天智能电推进技术", ap:"北京航空航天大学", a:""},
+    {sub:"飞行器运维工程", ap:"中国民航大学、上海电机学院", a:""},
+  ]},
+  {name:"机械类", subs:[
+    {sub:"机械工程", ap:"清华大学、上海交通大学、浙江大学、西安交通大学、北京理工大学、东南大学、华南理工大学", a:"北京航空航天大学、南京航空航天大学、吉林大学、南京理工大学、东北大学、北京交通大学、浙江工业大学"},
+    {sub:"机械设计制造及其自动化", ap:"哈尔滨工业大学、华中科技大学、大连理工大学、天津大学、西北工业大学、重庆大学、湖南大学、西南交通大学、燕山大学、同济大学", a:"中南大学、江苏大学、山东大学、合肥工业大学、西安电子科技大学、太原理工大学、中国科学技术大学、上海大学、西安理工大学、哈尔滨工程大学、福州大学、广东工业大学、四川大学、浙江理工大学、中国石油大学（华东）、电子科技大学、武汉理工大学、华东理工大学、贵州大学、长春理工大学、长安大学、上海理工大学、厦门大学、河北工业大学、中国农业大学、杭州电子科技大学、中国地质大学（武汉）、广西大学、湖南科技大学、哈尔滨理工大学、武汉大学、北京信息科技大学、西安工业大学、河南科技大学、北京化工大学、青岛理工大学、中北大学、江苏科技大学、沈阳工业大学、安徽理工大学、西南科技大学、山东科技大学、兰州理工大学、南昌大学"},
+    {sub:"材料成型及控制工程", ap:"华中科技大学、哈尔滨工业大学、大连理工大学、西北工业大学", a:"天津大学、北京理工大学、重庆大学、北京科技大学、山东大学、武汉理工大学、四川大学、吉林大学、西南交通大学、华南理工大学、东北大学、合肥工业大学、燕山大学、南京理工大学、南昌大学、中国石油大学（华东）、广东工业大学、太原理工大学、江苏大学、河北工业大学"},
+    {sub:"机械电子工程", ap:"北京理工大学、哈尔滨工业大学、重庆大学、西北工业大学、同济大学、华南理工大学", a:"北京交通大学、上海大学、江苏大学、广东工业大学、河北工业大学、浙江理工大学、太原理工大学、长安大学、中国农业大学、长春理工大学、武汉科技大学、东北大学、南京林业大学、广西大学、天津工业大学、桂林电子科技大学、哈尔滨理工大学、苏州大学、江苏科技大学、西安科技大学、西安工业大学、山东科技大学、天津理工大学、重庆理工大学、河南科技大学、东北林业大学、北京建筑大学"},
+    {sub:"工业设计", ap:"湖南大学、浙江大学、同济大学、上海交通大学、西安交通大学", a:"西北工业大学、天津大学、江南大学、大连理工大学、哈尔滨工业大学、北京航空航天大学、北京理工大学、南京理工大学、浙江理工大学、华南理工大学、西安电子科技大学、南京航空航天大学、武汉理工大学、北京科技大学、广东工业大学、东华大学、华东理工大学、中国美术学院、合肥工业大学、哈尔滨工程大学、吉林大学"},
+    {sub:"过程装备与控制工程", ap:"西安交通大学、浙江大学", a:"大连理工大学、天津大学、华南理工大学、东北大学、华东理工大学、四川大学、中国石油大学（华东）、武汉理工大学"},
+    {sub:"车辆工程", ap:"清华大学、北京理工大学、同济大学、北京航空航天大学、西安交通大学", a:"吉林大学、哈尔滨工业大学、浙江大学、湖南大学、西南交通大学、重庆大学、合肥工业大学、武汉理工大学、江苏大学、南京航空航天大学、中南大学、北京交通大学、燕山大学、东北大学、南京理工大学、北京科技大学、河北工业大学、中国农业大学、长安大学、浙江工业大学、福州大学、中国石油大学（华东）"},
+    {sub:"汽车服务工程", ap:"长安大学、武汉理工大学、上海工程技术大学", a:"江苏理工学院、宁波工程学院、昆明理工大学、山东交通学院、河南农业大学、南京工程学院、西华大学、安阳工学院、湖北汽车工业学院、常州工学院、深圳技术大学、天津中德应用技术大学"},
+    {sub:"机械工艺技术", ap:"湖南师范大学、黑龙江科技大学", a:""},
+    {sub:"微机电系统工程", ap:"北京航空航天大学、西北工业大学", a:""},
+    {sub:"机电技术教育", ap:"天津职业技术师范大学、岭南师范学院", a:""},
+    {sub:"汽车维修工程教育", ap:"黄河交通学院、哈尔滨剑桥学院", a:""},
+    {sub:"智能制造工程", ap:"西安交通大学、北京理工大学、天津大学、哈尔滨工业大学、北京航空航天大学、大连理工大学、西南交通大学", a:"重庆大学、吉林大学、湖南大学、上海大学、南京航空航天大学、山东大学、同济大学、南京理工大学、华南理工大学、东北大学、合肥工业大学、哈尔滨工程大学、北京工业大学、河北工业大学、北京科技大学、燕山大学、江苏大学、武汉理工大学、广东工业大学、杭州电子科技大学、中国石油大学（华东）、北京交通大学、中国矿业大学、武汉大学、华东理工大学、河海大学、苏州大学、武汉科技大学、浙江理工大学、长安大学"},
+    {sub:"智能车辆工程", ap:"哈尔滨工业大学、东南大学", a:"大连理工大学、湖南大学、华南理工大学、合肥工业大学"},
+    {sub:"仿生科学与工程", ap:"哈尔滨工业大学、吉林大学", a:""},
+    {sub:"新能源汽车工程", ap:"江苏大学、广东工业大学", a:""},
+  ]},
+  {name:"计算机类", subs:[
+    {sub:"计算机科学与技术", ap:"清华大学、浙江大学、哈尔滨工业大学、北京航空航天大学、上海交通大学、北京大学、华中科技大学、南京大学、中国科学技术大学、北京理工大学、西安电子科技大学、西北工业大学、东南大学、同济大学、电子科技大学、西安交通大学、华南理工大学、湖南大学、中国人民大学", a:"复旦大学、武汉大学、吉林大学、北京邮电大学、中山大学、东北大学、深圳大学、南开大学、中南大学、北京交通大学、山东大学、天津大学、南京理工大学、南京航空航天大学、大连理工大学、重庆大学、厦门大学、杭州电子科技大学、华东师范大学、合肥工业大学、哈尔滨工程大学、四川大学、桂林电子科技大学、河海大学、西北大学、重庆邮电大学、南京邮电大学、北京工业大学、北京师范大学、新疆大学、安徽大学、南方科技大学、北京科技大学、浙江工业大学、中国农业大学、武汉理工大学、苏州大学、上海大学、中国海洋大学、福州大学、上海科技大学、兰州大学、南京信息工程大学、陕西师范大学、西南交通大学、江南大学、青岛大学、中国矿业大学、武汉科技大学、中国地质大学（武汉）、华中师范大学、昆明理工大学、西南大学、云南大学、华东理工大学、广西大学、太原理工大学、山西大学、贵州大学、东北师范大学、郑州大学、南京师范大学、南昌大学、中国石油大学（华东）、广州大学、大连海事大学、广东工业大学、暨南大学、山东科技大学、西安邮电大学、天津理工大学、华南师范大学、浙江工商大学、长春理工大学、内蒙古大学、齐鲁工业大学、西安理工大学、中央民族大学"},
+    {sub:"软件工程", ap:"清华大学、哈尔滨工业大学、西北工业大学、上海交通大学、北京航空航天大学、电子科技大学、华中科技大学、南京大学、北京大学、华东师范大学、浙江大学、大连理工大学、北京理工大学", a:"西安电子科技大学、复旦大学、东南大学、山东大学、同济大学、中南大学、天津大学、东北大学、湖南大学、武汉大学、华南理工大学、重庆大学、北京交通大学、北京邮电大学、深圳大学、中山大学、四川大学、吉林大学、西安交通大学、北京工业大学、杭州电子科技大学、苏州大学、南京理工大学、厦门大学、中国人民大学、南京航空航天大学、南开大学、西南交通大学、重庆邮电大学、中国地质大学（武汉）、郑州大学、哈尔滨工程大学、云南大学、合肥工业大学、浙江工业大学、西北大学、贵州大学、安徽大学、新疆大学、南京邮电大学、广东工业大学、东华大学、华南师范大学、华中师范大学、南京信息工程大学、中国石油大学（华东）、陕西师范大学、中北大学、武汉理工大学、长沙理工大学、华东理工大学、福州大学"},
+    {sub:"网络工程", ap:"北京邮电大学、电子科技大学、华南理工大学、杭州电子科技大学、温州大学、南京邮电大学、浙江工业大学", a:"广东工业大学、安徽大学、华南师范大学、广州大学、西安邮电大学、大连海事大学、武汉科技大学、南京信息工程大学、沈阳航空航天大学、山东科技大学、济南大学、北京林业大学、桂林电子科技大学、北京信息科技大学、成都信息工程大学、哈尔滨理工大学、长沙理工大学、长江大学、上海海事大学、河南大学、西安科技大学、西安石油大学、东莞理工学院、四川师范大学、福建师范大学、四川轻化工大学、浙江传媒学院、宁夏大学、沈阳理工大学"},
+    {sub:"信息安全", ap:"上海交通大学、中国科学技术大学、哈尔滨工业大学", a:"浙江大学、复旦大学、华中科技大学、北京航空航天大学、西北工业大学、北京邮电大学、西安电子科技大学、南开大学、武汉大学、中国人民大学、中南大学、湖南大学"},
+    {sub:"物联网工程", ap:"电子科技大学、西安交通大学、哈尔滨工业大学、西北工业大学、南京航空航天大学、北京邮电大学、吉林大学、北京交通大学、天津大学、东北大学", a:"南京邮电大学、重庆大学、南开大学、北京工业大学、大连理工大学、湖南大学、北京科技大学、江南大学、河海大学、西北大学、南京信息工程大学、重庆邮电大学、安徽大学、贵州大学、中国传媒大学、郑州大学、桂林电子科技大学、齐鲁工业大学、西安邮电大学、云南大学、广东工业大学、河北工业大学、江苏大学、暨南大学、中北大学、太原理工大学、山东科技大学、山东师范大学、广州大学、北京信息科技大学、大连海事大学、华侨大学、昆明理工大学、西安理工大学、南通大学、南昌航空大学、海南大学、湖南科技大学、安徽工程大学、江西财经大学、南京林业大学、天津理工大学、华东交通大学、郑州轻工业大学"},
+    {sub:"数字媒体技术", ap:"哈尔滨工业大学、北京邮电大学、湖南大学、山东大学、大连理工大学", a:"厦门大学、上海大学、杭州电子科技大学、华中师范大学、浙江工业大学、南京邮电大学、东北大学、北京工业大学、广东工业大学、云南大学、东北师范大学、北方工业大学、福州大学、桂林电子科技大学、北京林业大学、兰州大学、安徽大学、中国传媒大学、辽宁师范大学、湖北工业大学、西安理工大学、西安邮电大学"},
+    {sub:"智能科学与技术", ap:"北京大学、西安电子科技大学、南京大学、中山大学", a:"湖南大学、南开大学、华南理工大学、哈尔滨工业大学、华中科技大学、复旦大学、北京邮电大学、南京理工大学、重庆邮电大学、南方科技大学、杭州电子科技大学、上海大学、合肥工业大学、桂林电子科技大学、浙江工业大学、河海大学、中国地质大学（武汉）、中国海洋大学、西北大学"},
+    {sub:"空间信息与数字技术", ap:"武汉大学、西安电子科技大学", a:""},
+    {sub:"电子与计算机工程", ap:"上海交通大学、浙江大学", a:""},
+    {sub:"数据科学与大数据技术", ap:"哈尔滨工业大学、中国科学技术大学、复旦大学、华东师范大学、中国人民大学、北京大学、西北工业大学、同济大学、北京理工大学、北京邮电大学、电子科技大学、华中科技大学、中南大学、西安电子科技大学、山东大学", a:"吉林大学、重庆大学、天津大学、湖南大学、西南交通大学、华南理工大学、武汉大学、东北大学、南方科技大学、南京理工大学、浙江工业大学、北京师范大学、中国农业大学、中国矿业大学、苏州大学、南京邮电大学、上海大学、厦门大学、北京交通大学、重庆邮电大学、中国海洋大学、中国地质大学（武汉）、武汉理工大学、云南大学、安徽大学、兰州大学、南京信息工程大学"},
+  ]},
+  {name:"人工智能", subs:[
+    {sub:"AI「101计划」牵头/参与高校", ap:"西安交通大学、清华大学、北京大学、北京航空航天大学、北京理工大学、北京师范大学、北京邮电大学、上海交通大学、复旦大学、同济大学、浙江大学、南京大学、哈尔滨工业大学、中国科学技术大学、湖南大学", a:""},
+    {sub:"软科专业排名 A+ 高校", ap:"清华大学、上海交通大学、西安电子科技大学、东南大学、浙江大学、中国科学技术大学、华中科技大学、南京大学、电子科技大学、哈尔滨工业大学、北京航空航天大学、西北工业大学", a:""},
+    {sub:"CSRankings 全领域前 20", ap:"浙江大学、上海交通大学、北京大学、清华大学、中国科学技术大学、哈尔滨工业大学、南京大学、中国科学院大学、中国人民大学、复旦大学、电子科技大学、武汉大学、东南大学、北京航空航天大学、中山大学、北京邮电大学、深圳大学、华中科技大学、南开大学、吉林大学", a:""},
+    {sub:"CSRankings 人工智能子领域", ap:"浙江大学、南京大学、上海交通大学、哈尔滨工业大学、电子科技大学、北京大学、武汉大学、中国科学技术大学、清华大学、西安电子科技大学、深圳大学、中国科学院大学、东南大学、北京航空航天大学、北京邮电大学、吉林大学、复旦大学、中山大学、厦门大学、华中科技大学、中国人民大学", a:""},
+    {sub:"CSRankings 计算机视觉子领域", ap:"浙江大学、上海交通大学、北京大学、中国科学技术大学、南京大学、清华大学、中山大学、哈尔滨工业大学、武汉大学、中国科学院大学、复旦大学、南开大学、西安电子科技大学、电子科技大学、厦门大学、华中科技大学、深圳大学、西安交通大学、北京航空航天大学、东南大学", a:""},
+    {sub:"CSRankings 机器学习子领域", ap:"上海交通大学、北京大学、清华大学、南京大学、浙江大学、中国科学技术大学、中国科学院大学、中国人民大学、哈尔滨工业大学、复旦大学、香港中文大学（深圳）、东南大学、武汉大学、中山大学、电子科技大学、西湖大学、厦门大学、华中科技大学、天津大学、北京邮电大学", a:""},
+    {sub:"CSRankings 自然语言处理子领域", ap:"哈尔滨工业大学、北京大学、清华大学、浙江大学、中国科学院大学、中国人民大学、上海交通大学、复旦大学、中国科学技术大学、南京大学、苏州大学、东南大学、北京航空航天大学、香港中文大学（深圳）、北京邮电大学、东北大学、武汉大学、中山大学、西湖大学、天津大学", a:""},
+    {sub:"CSRankings 网络与信息检索子领域", ap:"中国人民大学、浙江大学、清华大学、中国科学技术大学、上海交通大学、北京大学、电子科技大学、复旦大学、哈尔滨工业大学、深圳大学、北京航空航天大学、南京大学、南开大学、中国科学院大学、吉林大学、北京邮电大学、同济大学、华中科技大学、苏州大学、天津大学", a:""},
+  ]},
+  {name:"生物医学工程类", subs:[
+    {sub:"生物医学工程", ap:"东南大学、清华大学", a:"上海交通大学、北京大学、北京航空航天大学、华中科技大学、复旦大学、西安交通大学、天津大学、浙江大学、四川大学、电子科技大学、北京理工大学、中山大学"},
+    {sub:"假肢矫形工程", ap:"首都医科大学、徐州医科大学", a:""},
+    {sub:"临床工程技术", ap:"上海健康医学院", a:""},
+    {sub:"康复工程", ap:"上海理工大学、上海健康医学院", a:""},
+    {sub:"健康科学与技术", ap:"上海交通大学", a:""},
+  ]},
+  {name:"微电子·集成电路", subs:[
+    {sub:"国家示范性微电子学院首批(9所)", ap:"北京大学、清华大学、中国科学院大学、复旦大学、上海交通大学、浙江大学、东南大学、电子科技大学、西安电子科技大学", a:""},
+    {sub:"首批筹建名单(17所)", ap:"北京航空航天大学、北京理工大学、北京工业大学、天津大学、大连理工大学、同济大学、南京大学、中国科学技术大学、合肥工业大学、福州大学、山东大学、华中科技大学、国防科技大学、中山大学、华南理工大学、西安交通大学、西北工业大学", a:""},
+    {sub:"第三批(2所)", ap:"厦门大学、南方科技大学", a:""},
+    {sub:"首批集成电路一级学科博士点", ap:"复旦大学、北京大学、清华大学、北京航空航天大学、北京理工大学、北京邮电大学、上海交通大学、南京大学、东南大学、南京邮电大学、浙江大学、杭州电子科技大学、厦门大学、华中科技大学、华南理工大学、电子科技大学、西北工业大学、西安电子科技大学、中国科学院大学", a:""},
+  ]},
+  {name:"仪器类", subs:[
+    {sub:"测控技术与仪器", ap:"北京航空航天大学、哈尔滨工业大学、清华大学、天津大学", a:"东南大学、电子科技大学、北京理工大学、吉林大学、西安交通大学、重庆大学、中国科学技术大学、合肥工业大学、西安电子科技大学、大连理工大学、中国计量大学、南京航空航天大学、中北大学、北京科技大学、南京理工大学、哈尔滨工程大学、北京工业大学、湖南大学、北京信息科技大学"},
+    {sub:"精密仪器", ap:"哈尔滨工业大学", a:""},
+    {sub:"智能感知工程", ap:"哈尔滨工业大学、北京航空航天大学", a:"天津大学、上海交通大学、北京理工大学"},
+  ]},
+  {name:"自动化类", subs:[
+    {sub:"自动化", ap:"清华大学、北京理工大学、浙江大学、上海交通大学、北京航空航天大学、哈尔滨工程大学、哈尔滨工业大学、西安交通大学、东北大学", a:"华中科技大学、东南大学、山东大学、西北工业大学、南开大学、中南大学、大连理工大学、南京航空航天大学、北京科技大学、同济大学、中国科学技术大学、南京理工大学、重庆大学、电子科技大学、华东理工大学、湖南大学、江南大学、华南理工大学、天津大学、杭州电子科技大学、广东工业大学、北京工业大学、西安理工大学、上海大学、北京交通大学、北京邮电大学、华北电力大学、北京化工大学、南京邮电大学、合肥工业大学、西安电子科技大学、四川大学、青岛大学、吉林大学、中国地质大学（武汉）、山东科技大学、武汉大学、浙江工业大学、郑州大学"},
+    {sub:"轨道交通信号与控制", ap:"北京交通大学、西南交通大学", a:"南京理工大学、中南大学、华东交通大学、长沙理工大学"},
+    {sub:"机器人工程", ap:"哈尔滨工业大学、北京航空航天大学、东南大学、山东大学、浙江大学、西北工业大学、北京理工大学", a:"哈尔滨工程大学、东北大学、湖南大学、南京航空航天大学、华中科技大学、北京科技大学、中国科学技术大学、南方科技大学、天津大学、南京理工大学、华东理工大学、北京工业大学、电子科技大学、山东科技大学、重庆大学、华南理工大学、西安电子科技大学、广东工业大学、北京化工大学、上海大学、江南大学、北京邮电大学、中国矿业大学、北京大学、燕山大学、合肥工业大学、吉林大学、武汉大学、南京邮电大学、深圳大学、北京信息科技大学、华北电力大学"},
+    {sub:"邮政工程", ap:"南京邮电大学、重庆邮电大学、西安邮电大学", a:""},
+    {sub:"核电技术与控制工程", ap:"上海电力大学", a:""},
+    {sub:"智能装备与系统", ap:"哈尔滨工业大学、北京交通大学", a:""},
+    {sub:"工业智能", ap:"东北大学、沈阳工业大学", a:""},
+    {sub:"智能工程与创意设计", ap:"清华大学、中国传媒大学", a:""},
+  ]},
 ];
-const CATS = ["全部","工学","医学","法学","经济学","文学","管理学"];
-const CAT_COLOR = {工学:"#2d6cdf",医学:"#e5484d",法学:"#8e44ad",经济学:"#e67e22",文学:"#0ea5a0",管理学:"#7f8c9b"};
+const MAJ_NAMES = MAJOR_GROUPS.map(g=>g.name);
 
 /* ============ 模块3/4 共用：院校库 + 分差算法 ============ */
 const SCHOOLS = [
@@ -419,7 +531,7 @@ function classify(diff){ if(diff>=-15&&diff<0)return"冲"; if(diff>=0&&diff<=10)
 
 /* ============ 通用渲染工具 ============ */
 function renderTable(head, rows){ return `<div class="tbl-scroll"><table><thead><tr>${head.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>i===0?`<td><span class="school">${c}</span></td>`:`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
-function collegeCard(c, showAp){ const ap=(showAp&&c.ap&&c.ap.length)?`<div class="block"><div class="bt">王牌 / A+ 学科</div><div class="chips">${c.ap.map(x=>`<span class="chip">${x}</span>`).join("")}</div></div>`:""; return `<div class="college"><div class="head"><div class="name">${c.n}</div><div>${lvBadge(c.lv)}</div></div><div class="tagline">${c.tag||""}</div><div class="stats"><div class="stat"><div class="v">${c.by||"—"}</div><div class="k">保研率</div></div><div class="stat"><div class="v">${c.sx||"—"}</div><div class="k">升学率</div></div></div>${ap}${c.job?`<div class="block"><div class="bt">行业与企业对接</div><div class="bd">${c.job}</div></div>`:""}${c.life?`<div class="foot">${c.life}</div>`:""}</div>`; }
+function collegeCard(c, showAp){ const ap=(showAp&&c.ap&&c.ap.length)?`<div class="block"><div class="bt">王牌 / A+ 学科</div><div class="chips">${c.ap.map(x=>`<span class="chip">${x}</span>`).join("")}</div></div>`:""; return `<div class="college" id="sch-${norm(c.n)}"><div class="head"><div class="name">${c.n}</div><div>${lvBadge(c.lv)}</div></div><div class="tagline">${c.tag||""}</div><div class="stats"><div class="stat"><div class="v">${c.by||"—"}</div><div class="k">保研率</div></div><div class="stat"><div class="v">${c.sx||"—"}</div><div class="k">升学率</div></div></div>${ap}${c.job?`<div class="block"><div class="bt">行业与企业对接</div><div class="bd">${c.job}</div></div>`:""}${c.life?`<div class="foot">${c.life}</div>`:""}</div>`; }
 function rankChart(top){ const arr=top.filter(c=>c.by&&c.by!=="暂无"&&c.by!=="暂无推免").map(c=>({n:c.n,v:parseFloat(c.by)})).sort((a,b)=>b.v-a.v); if(!arr.length)return""; const max=Math.max(...arr.map(a=>a.v)); const W=680,H=arr.length*30+12,px=132,pw=W-px-50; let el=""; arr.forEach((c,i)=>{const bw=Math.max(c.v/max*pw,3);const y=i*30+6;el+=`<text x="0" y="${y+16}" font-size="13" fill="#5a6478">${c.n}</text><rect x="${px}" y="${y}" width="${bw}" height="21" rx="6" fill="#5b7cff"></rect><text x="${px+bw+8}" y="${y+15}" font-size="13" font-weight="800" fill="#1f2430">${c.v}%</text>`;}); return `<svg viewBox="0 0 ${W} ${H}">${el}</svg><div class="tip">保研率越高，深造通道越宽（数据年份随校而异）。</div>`; }
 function renderStrat(d){ return d.strat.map(s=>`<div class="strat"><div class="st"><span class="ic" style="background:${s.bg}">${s.ic}</span>${s.t}</div><div class="paths">${s.paths.map(p=>`<div class="path"><span class="dir">${p[0]}</span><span class="txt">${p[1]}</span></div>`).join("")}</div></div>`).join(""); }
 function donut(data,colors){ const total=data.reduce((s,d)=>s+d.value,0); if(!total)return'<div style="color:#8a93a6;text-align:center;padding:20px">暂无数据</div>'; const R=76,C=2*Math.PI*R,cx=108,cy=98; let off=0,segs="",lg=""; data.forEach((d,i)=>{if(!d.value)return;const f=d.value/total,dash=f*C;segs+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${colors[i]}" stroke-width="24" stroke-dasharray="${dash} ${C-dash}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"></circle>`;lg+=`<div class="li"><span class="sw" style="background:${colors[i]}"></span>${d.label} · ${d.value}</div>`;off+=dash;}); return `<svg viewBox="0 0 216 196">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="24" font-weight="800" fill="#1f2430">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="12" fill="#8a93a6">匹配院校</text></svg><div class="legend">${lg}</div>`; }
@@ -431,8 +543,8 @@ function renderProvSwitch(){ $("#provSwitch").innerHTML=Object.keys(DATA).map(k=
 function renderM1Title(){ $("#m1Title").innerHTML=`<div class="card" style="margin-bottom:16px;padding:16px 20px"><span style="font-size:15px;font-weight:800">${D().name}高校解读</span><span style="font-size:13px;color:var(--muted);margin-left:8px">${D().desc}</span></div>`; }
 function paneIndus(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>${d.indusTitle}</div><div class="sec-desc">${d.indusDesc}</div><div class="statstrip">${d.stats.map(s=>`<div class="s"><div class="v">${s.v}</div><div class="k">${s.k}</div></div>`).join("")}</div>${d.indusLayers.map(l=>`<div class="indus-layer"><span class="ih" style="background:${l.color}">${l.title}</span><div class="items">${l.items.map(it=>`<div class="indus-item">${it.n}${it.s?`<small>${it.s}</small>`:""}</div>`).join("")}</div></div>`).join("")}</div><div class="card"><div class="sec-title"><span class="bar"></span>${d.regionTitle}</div><div class="sec-desc">${d.regionDesc}</div>${renderTable(d.region[0],d.region.slice(1))}${d.regionNote?`<div class="note">${d.regionNote}</div>`:""}</div>`; }
 function paneTop(){ const d=D(); return `<div class="card" style="margin-bottom:16px"><div class="sec-title"><span class="bar"></span>主力院校 · 保研率一览</div><div class="sec-desc">${d.topDesc}</div><div>${rankChart(d.top)}</div></div><div class="grid">${d.top.map(c=>collegeCard(c,true)).join("")}</div>`; }
-function paneOther(){ const d=D(); const brief=d.otherBrief&&d.otherBrief.length?`<div class="brief-list">${d.otherBrief.map(b=>`<div class="brief"><b>${b.n}</b><div class="d">${b.d}</div></div>`).join("")}</div>`:""; return `<div class="card" style="margin-bottom:16px"><div class="sec-title"><span class="bar"></span>其他公办本科</div><div class="sec-desc">${d.otherDesc}</div></div><div class="grid">${d.other.map(c=>collegeCard(c,false)).join("")}</div>${brief}`; }
-function paneVoc(){ const d=D(); const coop=d.coop&&d.coop.length?`<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>中外（港澳）合作办学</div><div class="sec-desc">${d.coopDesc||""}</div><div class="mini-list">${d.coop.map(m=>`<div class="mini"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>`:""; return `<div class="card"><div class="sec-title"><span class="bar"></span>民办本科</div><div class="sec-desc">${d.mbDesc}</div><div class="mini-list">${d.mb.map(m=>`<div class="mini"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>${coop}<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>高职 / 专科（订单班导向）</div><div class="sec-desc">${d.zkDesc}</div>${renderTable(d.zk[0],d.zk.slice(1))}${d.zkNote?`<div class="note">${d.zkNote}</div>`:""}</div>`; }
+function paneOther(){ const d=D(); const brief=d.otherBrief&&d.otherBrief.length?`<div class="brief-list">${d.otherBrief.map(b=>`<div class="brief" id="sch-${norm(b.n)}"><b>${b.n}</b><div class="d">${b.d}</div></div>`).join("")}</div>`:""; return `<div class="card" style="margin-bottom:16px"><div class="sec-title"><span class="bar"></span>其他公办本科</div><div class="sec-desc">${d.otherDesc}</div></div><div class="grid">${d.other.map(c=>collegeCard(c,false)).join("")}</div>${brief}`; }
+function paneVoc(){ const d=D(); const coop=d.coop&&d.coop.length?`<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>中外（港澳）合作办学</div><div class="sec-desc">${d.coopDesc||""}</div><div class="mini-list">${d.coop.map(m=>`<div class="mini" id="sch-${norm(m.n)}"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>`:""; return `<div class="card"><div class="sec-title"><span class="bar"></span>民办本科</div><div class="sec-desc">${d.mbDesc}</div><div class="mini-list">${d.mb.map(m=>`<div class="mini"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>${coop}<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>高职 / 专科（订单班导向）</div><div class="sec-desc">${d.zkDesc}</div>${renderTable(d.zk[0],d.zk.slice(1))}${d.zkNote?`<div class="note">${d.zkNote}</div>`:""}</div>`; }
 function paneStrat(){ const d=D(); return `<div class="card">${renderStrat(d)}</div>`; }
 function paneSoe(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>院校专业 ↔ 央国企对照</div><div class="sec-desc">${d.soeDesc}</div>${renderTable(d.soe[0],d.soe.slice(1))}</div>`; }
 function paneDorm(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>宿舍与食堂速览</div><div class="sec-desc">${d.dormDesc}</div>${renderTable(d.dorm[0],d.dorm.slice(1))}</div>`; }
@@ -442,10 +554,43 @@ function setProv(k){ M1_PROV=k; document.querySelectorAll(".prov-btn").forEach(b
 function setM1Tab(t){ M1_TAB=t; document.querySelectorAll("#m1Tabs .tab").forEach(x=>x.classList.toggle("active",x.dataset.t===t)); renderM1(); }
 
 /* ============ 模块2 渲染 ============ */
-let MAJ_CAT="全部";
-function renderMajCat(){ $("#majCat").innerHTML=CATS.map(c=>`<div class="tab ${c===MAJ_CAT?'active':''}" onclick="setMajCat('${c}')">${c}</div>`).join(""); }
-function renderMajors(){ const list=MAJ_CAT==="全部"?MAJORS:MAJORS.filter(m=>m.cat===MAJ_CAT); $("#majGrid").innerHTML=list.map(m=>`<div class="major"><div class="mh"><div class="mn">${m.n}</div><span class="cat" style="background:${CAT_COLOR[m.cat]||'#4f6ef7'}">${m.cat}</span></div><div class="one">${m.one}</div><div class="row"><b>学什么：</b><span class="v">${m.learn}</span></div><div class="row"><b>就业方向：</b><span class="v">${m.job}</span></div><div class="row"><b>选科要求：</b><span class="v">${m.xk}</span></div><div class="row"><b>适合谁：</b><span class="v">${m.fit}</span></div><div class="row"><b>代表院校：</b><div class="schools">${m.schools.map(s=>`<span>${s}</span>`).join("")}</div></div></div>`).join(""); }
-function setMajCat(c){ MAJ_CAT=c; renderMajCat(); renderMajors(); }
+let MAJ_IDX=0;
+function norm(s){ return (s||"").replace(/[()（）\s·]/g,""); }
+const schoolIndex={};
+function buildSchoolIndex(){ for(const prov in DATA){ const d=DATA[prov]; (d.top||[]).forEach(c=>schoolIndex[norm(c.n)]={prov,tab:"top"}); (d.other||[]).forEach(c=>schoolIndex[norm(c.n)]={prov,tab:"other"}); (d.otherBrief||[]).forEach(c=>schoolIndex[norm(c.n)]={prov,tab:"other"}); (d.coop||[]).forEach(c=>schoolIndex[norm(c.n)]={prov,tab:"voc"}); } }
+function schoolTag(name){ const info=schoolIndex[norm(name)]; if(info){ return `<span class="stag link" onclick="jumpToSchool('${name}')" title="点击查看分省份解读">${name}</span>`; } return `<span class="stag">${name}</span>`; }
+function jumpToSchool(name){ const info=schoolIndex[norm(name)]; if(!info) return; switchMod("m1"); setProv(info.prov); setM1Tab(info.tab); setTimeout(()=>{ const el=document.getElementById("sch-"+norm(name)); if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),2200); } }, 80); }
+function renderMajCat(){ $("#majCat").innerHTML=MAJOR_GROUPS.map((g,i)=>`<div class="tab ${i===MAJ_IDX?'active':''}" onclick="setMajCat(${i})">${g.name}</div>`).join(""); }
+function renderMajors(){ const g=MAJOR_GROUPS[MAJ_IDX]; $("#majGrid").innerHTML=g.subs.map(s=>`<div class="sub-block"><div class="sub-name">${s.sub}</div>${s.ap?`<div class="sub-row"><span class="lvl-tag ap">A+</span>${s.ap.split("、").map(schoolTag).join("")}</div>`:""}${s.a?`<div class="sub-row"><span class="lvl-tag a">A</span>${s.a.split("、").map(schoolTag).join("")}</div>`:""}</div>`).join(""); }
+function setMajCat(i){ MAJ_IDX=i; renderMajCat(); renderMajors(); }
+
+/* ============ 专业体系总览（13 门类） ============ */
+const CATALOG=[
+ {no:"01",name:"哲学",color:"#5b6b8c",cls:["哲学类"]},
+ {no:"02",name:"经济学",color:"#e6a23c",cls:["经济学类","财政学类","金融学类","经济与贸易类"]},
+ {no:"03",name:"法学",color:"#c0392b",cls:["法学类","政治学类","社会学类","民族学类","马克思主义理论类","公安学类"]},
+ {no:"04",name:"教育学",color:"#27ae60",cls:["教育学类","体育学类"]},
+ {no:"05",name:"文学",color:"#d94f8a",cls:["中国语言文学类","外国语言文学类","新闻传播学类"]},
+ {no:"06",name:"历史学",color:"#a0613c",cls:["历史学类"]},
+ {no:"07",name:"理学",color:"#2d6cdf",cls:["数学类","物理学类","化学类","天文学类","地理科学类","大气科学类","海洋科学类","地球物理学类","地质学类","生物科学类","心理学类","统计学类"]},
+ {no:"08",name:"工学",color:"#e67e22",cls:["力学类","机械类","仪器类","材料类","能源动力类","电气类","电子信息类","自动化类","计算机类","土木类","水利类","测绘类","化工与制药类","地质类","矿业类","纺织类","轻工类","交通运输类","海洋工程类","航空航天类","兵器类","核工程类","农业工程类","林业工程类","环境科学与工程类","生物医学工程类","食品科学与工程类","建筑类","安全科学与工程类","生物工程类","公安技术类"]},
+ {no:"09",name:"农学",color:"#7cb342",cls:["植物生产类","自然保护与环境生态类","动物生产类","动物医学类","林学类","水产类","草学类"]},
+ {no:"10",name:"医学",color:"#e5484d",cls:["基础医学类","临床医学类","口腔医学类","公共卫生与预防医学类","中医学类","中西医结合类","药学类","中药学类","法医学类","医学技术类","护理学类"]},
+ {no:"12",name:"管理学",color:"#8e44ad",cls:["管理科学与工程类","工商管理类","农业经济管理类","公共管理类","图书情报与档案管理类","物流管理与工程类","工业工程类","电子商务类","旅游管理类"]},
+ {no:"13",name:"艺术学",color:"#d4537e",cls:["艺术学理论类","音乐与舞蹈学类","戏剧与影视学类","美术学类","设计学类"]},
+ {no:"14",name:"交叉学科",color:"#16a085",cls:["集成电路科学与工程","国家安全学","设计学","遥感科学与技术","智能科学与技术","纳米科学与工程","区域国别学"]},
+];
+const CLASS2GROUP={"机械类":[1],"仪器类":[6],"自动化类":[7],"计算机类":[2],"电子信息类":[3,5],"航空航天类":[0],"生物医学工程类":[4]};
+let openGateIdx=-1;
+function renderCatalog(){
+  $("#catalogGates").innerHTML=CATALOG.map((g,i)=>`<div class="gate" style="--gc:${g.color}" onclick="toggleGate(${i})"><div class="gno">${g.no}</div><div class="gname">${g.name}</div><div class="gcnt">${g.cls.length} 个专业类</div></div>`).join("");
+  const box=$("#catalogClasses");
+  if(openGateIdx<0){ box.innerHTML=""; return; }
+  const g=CATALOG[openGateIdx];
+  box.innerHTML=`<div class="classes-wrap"><div class="classes-title">${g.name} · ${g.cls.length} 个专业类</div><div class="classes">${g.cls.map(c=>{const has=CLASS2GROUP[c];return `<span class="cls-chip ${has?'has':''}" onclick="openClass('${c}')">${c}${has?' ●':''}</span>`;}).join("")}</div></div>`;
+}
+function toggleGate(i){ openGateIdx=(openGateIdx===i?-1:i); renderCatalog(); }
+function openClass(name){ const g=CLASS2GROUP[name]; if(!g){ alert("「"+name+"」的强校数据待补充。\n目前已有：机械类、仪器类、自动化类、计算机类、电子信息类、航空航天类、生物医学工程类。"); return; } const c=document.getElementById("majCat"); if(c) c.scrollIntoView({behavior:"smooth",block:"start"}); setMajCat(g[0]); }
 
 /* ============ 模块3：梯度选校清单 ============ */
 let PICKED=[];
@@ -474,7 +619,7 @@ function bind(){
   $("#gSubject").addEventListener("change",renderGradient);
   $("#sSubject").addEventListener("change",renderSim);
 }
-renderProvSwitch(); renderM1(); renderMajCat(); renderMajors(); renderGradient(); renderSim(); bind();
+buildSchoolIndex(); renderProvSwitch(); renderM1(); renderCatalog(); renderMajCat(); renderMajors(); renderGradient(); renderSim(); bind();
 </script>
 </body>
 </html>
