@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>志愿填报工作台</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#fff; --line:#e6e9f2; --text:#1f2430; --muted:#8a93a6;
+    --primary:#4f6ef7; --primary-soft:#eef1fb;
+    --c985:#e5484d; --c211:#8e44ad; --csyl:#e67e22; --czk:#0ea5a0; --cmb:#7f8c9b;
+    --chong:#ff7a45; --wen:#4f6ef7; --bao:#2fbf71;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 20px 70px}
+
+  header.hero{padding:30px 0 16px}
+  header.hero .eyebrow{font-size:12px;letter-spacing:2px;color:var(--primary);font-weight:700}
+  header.hero h1{font-size:28px;font-weight:800;margin:8px 0 6px}
+  header.hero h1 .dot{color:var(--primary)}
+  header.hero p{font-size:14px;color:var(--muted);max-width:760px}
+
+  /* 模块导航 */
+  nav.modbar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:0 -20px;padding:10px 20px;box-shadow:0 2px 10px rgba(30,40,80,.04)}
+  nav.modbar .mods{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  nav.modbar .mods::-webkit-scrollbar{display:none}
+  .mod-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted);white-space:nowrap;transition:.15s;border:1px solid transparent}
+  .mod-btn:hover{color:var(--text);background:var(--primary-soft)}
+  .mod-btn.active{background:var(--primary);color:#fff}
+  .mod-btn .n{width:22px;height:22px;border-radius:6px;background:rgba(79,110,247,.15);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+  .mod-btn.active .n{background:rgba(255,255,255,.25);color:#fff}
+
+  section.mod{display:none;padding-top:24px;animation:fade .25s ease}
+  section.mod.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 1px 3px rgba(30,40,80,.04)}
+  .card + .card{margin-top:16px}
+  .sec-title{font-size:18px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+  .sec-title .bar{width:5px;height:20px;background:var(--primary);border-radius:3px;flex-shrink:0}
+  .sec-desc{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+  /* 徽章 */
+  .lv{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#fff;padding:2px 8px;border-radius:6px;vertical-align:2px;white-space:nowrap}
+  .lv-985{background:var(--c985)} .lv-211{background:var(--c211)} .lv-syl{background:var(--csyl)}
+  .lv-zk{background:var(--czk)} .lv-mb{background:var(--cmb)} .lv-pub{background:#2d6cdf}
+
+  .prov-switch{display:flex;gap:8px;margin-bottom:14px}
+  .prov-btn{padding:8px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:var(--card);border:1px solid var(--line);color:var(--muted);transition:.15s}
+  .prov-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+  .tab{padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:.15s;border:1px solid transparent}
+  .tab:hover{color:var(--text);background:var(--primary-soft)}
+  .tab.active{background:var(--primary);color:#fff}
+
+  .college{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;transition:.15s;display:flex;flex-direction:column}
+  .college:hover{border-color:#c9d2f5;box-shadow:0 6px 18px rgba(60,80,160,.08);transform:translateY(-2px)}
+  .college .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+  .college .name{font-size:18px;font-weight:800;line-height:1.3}
+  .college .tagline{font-size:12.5px;color:#5a6478;margin:6px 0 12px;line-height:1.6}
+  .college .stats{display:flex;gap:10px;margin-bottom:14px}
+  .college .stat{flex:1;background:#f6f8fd;border-radius:10px;padding:9px 10px;text-align:center}
+  .college .stat .v{font-size:18px;font-weight:800;color:var(--primary)}
+  .college .stat .k{font-size:11px;color:var(--muted);margin-top:1px}
+  .college .block{margin-bottom:11px}
+  .college .block .bt{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .college .block .bd{font-size:13px;color:#3a4356;line-height:1.7}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:11.5px;padding:3px 9px;border-radius:7px;background:#fdeaea;color:#c0392b;font-weight:600}
+  .college .foot{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+
+  .indus-layer{margin-bottom:16px}
+  .indus-layer .ih{font-size:13px;font-weight:800;color:#fff;display:inline-block;padding:3px 12px;border-radius:999px;margin-bottom:9px}
+  .indus-layer .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .indus-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:600}
+  .indus-item small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+  .statstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .statstrip .s{background:linear-gradient(135deg,#5b7cff,#4f6ef7);color:#fff;border-radius:12px;padding:14px 16px}
+  .statstrip .s .v{font-size:22px;font-weight:800}
+  .statstrip .s .k{font-size:12px;opacity:.92}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:700;font-size:12px;white-space:nowrap;background:#f8faff}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#f8faff}
+  .tbl-scroll{overflow-x:auto}
+  .school{font-weight:700}
+
+  .strat{margin-bottom:18px}
+  .strat .st{font-size:15px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .strat .st .ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+  .strat .paths{display:flex;flex-direction:column;gap:8px}
+  .strat .path{display:flex;gap:10px;align-items:flex-start;background:#f8faff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13.5px}
+  .strat .path .dir{font-weight:700;color:var(--primary);white-space:nowrap;flex-shrink:0}
+  .strat .path .txt{color:#3a4356}
+
+  .note{font-size:12.5px;color:var(--muted);background:#fff8ed;border:1px solid #f5e3c4;border-radius:10px;padding:12px 14px;margin-top:16px;line-height:1.8}
+  .mini-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+  .mini{border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:13px;background:#fff}
+  .mini b{font-weight:700}
+  .mini .d{color:#5a6478;font-size:12.5px}
+  .brief-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
+  .brief{background:#f8faff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13px}
+  .brief .d{color:#5a6478;font-size:12.5px}
+
+  /* 专业卡片 */
+  .major{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;display:flex;flex-direction:column}
+  .major .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .major .mn{font-size:17px;font-weight:800}
+  .major .cat{font-size:11px;font-weight:700;color:#fff;padding:2px 9px;border-radius:6px}
+  .major .one{font-size:13px;color:var(--primary);font-weight:600;margin-bottom:12px}
+  .major .row{margin-bottom:9px;font-size:13px}
+  .major .row b{color:var(--muted);font-weight:700;font-size:12px}
+  .major .row .v{color:#3a4356}
+  .major .schools{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .major .schools span{font-size:11.5px;background:#eef1fb;color:#4a56a0;padding:2px 8px;border-radius:6px}
+
+  /* 模块3 清单 */
+  .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .field select,.field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fafbfe;color:var(--text);outline:none}
+  .field select:focus,.field input:focus{border-color:var(--primary);background:#fff}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:11px 18px;border-radius:10px;font-size:14px;font-weight:600;transition:.15s;white-space:nowrap}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:#3d55d6}
+  .btn-ghost{background:#eef1f9;color:var(--text)}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:8px}
+
+  .tier-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:800px){.tier-cols{grid-template-columns:1fr}}
+  .tier-col{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+  .tier-col .tc-head{color:#fff;padding:12px 14px;font-weight:800;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  .tier-col .tc-body{padding:10px}
+  .tier-item{display:flex;align-items:center;gap:8px;padding:9px 8px;border-bottom:1px dashed var(--line);font-size:13px}
+  .tier-item:last-child{border-bottom:none}
+  .tier-item input{accent-color:var(--primary)}
+  .tier-item .tn{font-weight:700}
+  .tier-item .ts{color:var(--muted);font-size:11.5px}
+
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+  .kpi .k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;position:relative;overflow:hidden}
+  .kpi .k::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--primary))}
+  .kpi .k .v{font-size:24px;font-weight:800;line-height:1.1}
+  .kpi .k .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .viz-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:16px}
+  .viz-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .viz-box h3{font-size:14px;font-weight:700;margin-bottom:12px}
+  .viz-box svg{width:100%;height:auto;display:block}
+  .col-6{grid-column:span 6} .col-12{grid-column:span 12}
+  @media(max-width:820px){.col-6,.col-12{grid-column:span 12}}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px;color:#5a6478}
+  .legend .li{display:flex;align-items:center;gap:5px}
+  .legend .sw{width:10px;height:10px;border-radius:3px}
+
+  footer{margin-top:44px;text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">高考志愿填报 · 公益辅导工作台</div>
+    <h1>志愿填报工作台<span class="dot">.</span></h1>
+    <p>一个入口搞定：分省份高校解读、专业解读、梯度选校清单、模拟志愿填报（当前为模拟版，数据示例）。</p>
+  </header>
+
+  <nav class="modbar"><div class="mods">
+    <div class="mod-btn active" data-mod="m1"><span class="n">1</span>分省份高校解读</div>
+    <div class="mod-btn" data-mod="m2"><span class="n">2</span>专业解读</div>
+    <div class="mod-btn" data-mod="m3"><span class="n">3</span>梯度选校清单</div>
+    <div class="mod-btn" data-mod="m4"><span class="n">4</span>模拟志愿填报</div>
+  </div></nav>
+
+  <!-- 模块1：分省份高校解读 -->
+  <section class="mod active" id="mod-m1">
+    <div class="prov-switch" id="provSwitch"></div>
+    <div class="subtabs" id="m1Tabs">
+      <div class="tab active" data-t="indus">产业概览</div>
+      <div class="tab" data-t="top">主力院校</div>
+      <div class="tab" data-t="other">其他本科</div>
+      <div class="tab" data-t="voc">民办·专科</div>
+      <div class="tab" data-t="strat">报考策略</div>
+      <div class="tab" data-t="soe">央国企对照</div>
+      <div class="tab" data-t="dorm">宿舍食堂</div>
+    </div>
+    <div id="m1Title"></div>
+    <div id="m1Body"></div>
+  </section>
+
+  <!-- 模块2：专业解读 -->
+  <section class="mod" id="mod-m2">
+    <div class="card" style="margin-bottom:16px">
+      <div class="sec-title"><span class="bar"></span>热门专业解读</div>
+      <div class="sec-desc">每个专业讲清楚：学什么、就业去哪、选科要求、适合谁、代表院校（模拟数据）。</div>
+      <div class="subtabs" id="majCat"></div>
+    </div>
+    <div class="grid" id="majGrid"></div>
+  </section>
+
+  <!-- 模块3：梯度选校清单 -->
+  <section class="mod" id="mod-m3">
+    <div class="card">
+      <div class="sec-title"><span class="bar"></span>生成冲 · 稳 · 保 梯度清单</div>
+      <div class="sec-desc">输入分数，自动按分差分成三档，勾选后汇总成你的选校清单（模拟数据）。</div>
+      <div class="input-grid">
+        <div class="field"><label>科类</label><select id="gSubject"><option value="physics">物理类</option><option value="history">历史类</option></select></div>
+        <div class="field"><label>高考分数</label><input id="gScore" type="number" value="545"></div>
+        <div class="field"><button class="btn btn-primary" id="gGo">生成清单</button></div>
+      </div>
+      <div class="kpi" id="gKpi" style="margin-top:14px"></div>
+    </div>
+    <div class="tier-cols" id="gCols" style="margin-top:16px"></div>
+    <div class="card" style="margin-top:16px">
+      <div class="sec-title"><span class="bar"></span>我的选校清单 <span id="gCnt" style="font-size:13px;color:var(--muted);font-weight:400"></span></div>
+      <div id="gList"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="gCopy">复制清单</button>
+        <button class="btn btn-ghost btn-sm" id="gClear">清空</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模块4：模拟志愿填报 -->
+  <section class="mod" id="mod-m4">
+    <div class="card">
+      <div class="sec-title"><span class="bar"></span>模拟志愿填报</div>
+      <div class="sec-desc">输入分数/位次，一屏看清冲稳保梯度、院校层次与分数分布（模拟数据）。</div>
+      <div class="input-grid">
+        <div class="field"><label>科类</label><select id="sSubject"><option value="physics">物理类</option><option value="history">历史类</option></select></div>
+        <div class="field"><label>高考分数</label><input id="sScore" type="number" value="545"></div>
+        <div class="field"><label>全省位次（选填）</label><input id="sRank" type="number" placeholder="如 35000"></div>
+        <div class="field"><button class="btn btn-primary" id="sGo">生成推荐</button></div>
+      </div>
+      <div class="kpi" id="sKpi"></div>
+    </div>
+    <div class="viz-grid" id="sViz"></div>
+  </section>
+
+  <footer>模拟版 · 数据为示例，请以院校官方及省考试院发布为准</footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function lvColor(l){ if(l==="985")return"lv-985"; if(l==="211")return"lv-211"; if(l==="双一流")return"lv-syl"; if(l==="专科"||l==="职业本科")return"lv-zk"; if(l==="民办")return"lv-mb"; return"lv-pub"; }
+function lvBadge(lv){ if(!lv||!lv.length)return""; return lv.map(l=>`<span class="lv ${lvColor(l)}">${l}</span>`).join(" "); }
+
+/* ============ 模块1：分省份高校解读 ============ */
+const DATA = {
+  shanghai:{name:"上海",desc:"从上海产业格局出发，梳理双一流、市属本科、民办与专科院校，按「职业方向」倒推选校路径。",
+    stats:[{v:"4.07万亿",k:"规上工业产值"},{v:"4900亿",k:"集成电路产业规模"},{v:"35家",k:"科创板上市(全国第一)"},{v:"6300亿+",k:"人工智能产业规模"}],
+    indusTitle:"上海产业底盘：「2+3+6+6」现代化产业体系",indusDesc:"2025 年规上工业产值突破 4.07 万亿元，软件信息服务业站稳全市第三大支柱。",
+    indusLayers:[
+      {title:"2 大先导产业 · 全球领先",color:"#e5484d",items:[{n:"集成电路",s:"4900亿 · 全链布局"},{n:"人工智能",s:"6300亿+ · 全栈发展"}]},
+      {title:"3 大关键产业",color:"#8e44ad",items:[{n:"高端装备"},{n:"汽车产业"},{n:"先进材料"}]},
+      {title:"6 大重点产业",color:"#e67e22",items:[{n:"电子信息"},{n:"生命健康"},{n:"时尚消费品"},{n:"新能源"},{n:"智能网联汽车"},{n:"新材料"}]},
+      {title:"6 大未来产业",color:"#0ea5a0",items:[{n:"未来健康"},{n:"未来智能"},{n:"未来能源"},{n:"未来空间"},{n:"未来材料"},{n:"未来装备"}]}],
+    regionTitle:"重点区域产业地图",regionDesc:"就业高度集中在集成电路、人工智能、生物医药、大飞机、新能源汽车、高端装备等赛道。",
+    region:[["区域","重点产业","代表企业 / 园区"],["浦东新区·张江","集成电路、人工智能、生物医药","中芯国际、华虹集团、张江药谷、商汤科技"],["浦东新区·临港新片区","大飞机、新能源汽车、高端装备","中国商飞、特斯拉超级工厂、上海电气"],["徐汇区","人工智能大模型、生命健康","模速空间、腾讯华东总部、中山医院"],["闵行区","航天航空、高端装备","上海航天技术研究院、莘庄工业区"],["嘉定区","汽车产业、智能制造","上汽大众、蔚来汽车、上海国际汽车城"],["松江区","G60 科创走廊、智能制造","正泰电气、库卡机器人、临港松江科技城"],["宝山区","绿色钢铁、机器人","宝武集团、发那科机器人"],["中心城区(黄浦/陆家嘴等)","金融、航运、贸易","上交所、中国外汇交易中心、上港集团、上海机场集团"]],
+    regionNote:"「大国重器」走廊：大飞机（中国商飞）、造船（沪东中华）、航天（上海航天）构成工科就业的极深纵深。",
+    topDesc:"上海共 4 所 985、10 所 211、15 所双一流，高校密度仅次于北京。以下为 13 所主力院校。",
+    top:[
+      {n:"复旦大学",lv:["985","211","双一流"],tag:"C9 联盟，1905 年建校，素有「江南第一学府」之称",by:"44.73%",sx:"74.7%",ap:["中国语言文学","中国史","哲学","理论经济学","政治学","新闻传播学","马克思主义理论","数学","物理学","生物学","基础医学","公共卫生与预防医学"],job:"国家卫健委及直属医院、央行、券商、国家战略基金、TOP 药企；计算机大厂录用领先",life:"邯郸「旦苑」两层美食城、清真食堂口碑好；张江 4 人间独卫空调"},
+      {n:"上海交通大学",lv:["985","211","双一流"],tag:"C9 联盟，船舶与海洋工程、机械、临床医学、计算机全面顶尖",by:"48.6%",sx:"82%",ap:["外国语言文学","工商管理","生物学","管理科学与工程","计算机科学与技术","机械工程","材料科学与工程","船舶与海洋工程","临床医学","基础医学","口腔医学"],job:"上汽、上海电气、中国商飞、中船集团；计算机大厂录用常年居上海高校第一",life:"闵行「上海高校最好吃」，玉兰苑、哈乐餐厅；4 人间空调独卫"},
+      {n:"同济大学",lv:["985","211","双一流"],tag:"建筑老八校，土木、建筑、城乡规划、设计学集群全国顶尖",by:"40.6%",sx:"74.51%",ap:["设计学","土木工程","环境科学与工程","城乡规划学","管理科学与工程"],job:"上汽、上海建工、中国商飞每年校招首选；土木建筑在华东设计院、中建系统校友密度高",life:"四平路本部 4 人间；嘉定上床下桌+阳台；「学苑食堂」红烧大排一绝"},
+      {n:"华东师范大学",lv:["985","211","双一流"],tag:"教育部直属师大，教育学、生态学、统计学双一流，软件工程全国第一",by:"39.86%",sx:"58.5%",ap:["体育学","教育学","统计学"],job:"公费师范生（提前批）定向回沪带事业编；软件工程进阿里、腾讯、字节上海研发中心",life:"闵行新公寓 4 人间独卫空调阳台；华闵「金拱门网红餐厅」"},
+      {n:"上海财经大学",lv:["211","双一流"],tag:"财经类顶尖 211，软科财经第一，上海金融圈校友覆盖率极高",by:"24.8%",sx:"59.9%",ap:["应用经济学","工商管理学"],job:"四大上海分所「校招目标校」；上交所、股份制银行总部、公募私募及量化基金",life:"国定路 4 人间上床下桌、空调独卫阳台；绿叶餐厅、第一食堂口碑好"},
+      {n:"上海外国语大学",lv:["211","双一流"],tag:"外语类顶尖 211，外国语言文学全国首屈一指",by:"21.75%",sx:"56.6%",ap:["外国语言文学"],job:"上海外服、外交系统、领事馆、上汽国际营销、跨境电商及大型外企",life:"松江大学城 4 人间上床下桌独卫空调；文汇路美食街是主觅食地"},
+      {n:"华东理工大学",lv:["211","双一流"],tag:"化工强校，化学工程与技术全国第一，中石化校招「靶心院校」",by:"26.36%",sx:"52.1%",ap:["化学工程与技术","生物工程"],job:"中石化上海赛科、上海华谊集团、上药集团；自动化、计算机进上海电气、国电投",life:"奉贤 4 人间独卫空调；徐汇地处市区实习通勤方便"},
+      {n:"东华大学",lv:["211","双一流"],tag:"原中国纺织大学，纺织科学与工程全国第一，时尚设计与材料并进",by:"19.5%",sx:"44.5%",ap:["纺织科学与工程"],job:"上海纺织集团、东方国际集团；服装设计与上海时装周深度绑定；松江 G60 就业有优势",life:"松江 4 人间空调独卫；延安路校区地处市中心"},
+      {n:"上海大学",lv:["211","双一流"],tag:"市属综合大学实力最强，美术学、社会学、影视学科特色鲜明",by:"17.11%",sx:"51.2%",ap:["美术学","社会学"],job:"机械工程与上汽、上海电气共建联合实验室；美术、电影学院覆盖上海影视后期与动画圈",life:"宝山 4 人间空调独卫阳台；「尔美」网红餐厅"},
+      {n:"海军军医大学",lv:["211"],tag:"隶属海军，普通批招无军籍学员，在沪视同 211，三甲住培圈认可度高",by:"暂无",sx:"暂无",ap:["特种医学","药学","护理学"],job:"长海、长征、东方肝胆医院住培优先；比复交医低 50–80 分进三甲系统的重点选项",life:"军校管理严格；临床八年制（无军籍）、护理、药学为优势"},
+      {n:"上海科技大学",lv:["双一流"],tag:"上海与中国科学院共管，小规模高水平国际化研究型，综合评价录取",by:"45.76%",sx:"85.5%",ap:["（新建校暂无评估）"],job:"张江科学城核心，与中科院联合培养，本科深造率全国前列，适合走科研路线",life:"本科 2 人间上床下桌、中央空调独立卫浴，全市天花板级别"},
+      {n:"上海体育大学",lv:["双一流"],tag:"新中国第一所体育高等学府，体育学全国第一，2023 年更名大学",by:"14.14%",sx:"35.7%",ap:["体育学"],job:"体育赛事运营、体育局下属机构、安踏、李宁等体育品牌",life:"杨浦滨江，训练场馆设施一流"},
+      {n:"上海中医药大学",lv:["双一流"],tag:"全国中医院校中唯一拥有 3 个 A+ 学科，地处张江科学城",by:"21%",sx:"27.6%",ap:["中医学","中西医结合","中药学"],job:"沪上中医院系统、上药集团及张江药谷生物医药企业",life:"张江校区中医药博物馆典藏丰富，杏林药草葱郁"}],
+    otherDesc:"上海市属公办本科的行业对接极其鲜明——选校本质上是选行业。",
+    other:[
+      {n:"华东政法大学",lv:["市属重点"],tag:"「五院四系」成员，法学稳居全国前列",by:"9.68%",sx:"50.2%",ap:["法学"],job:"沪上律所、法院、检察院、纪委监委「人才库」；知识产权对接张江，经济法衔接陆家嘴金融法务",life:"松江大学城圣约翰大学历史建筑群"},
+      {n:"上海理工大学",lv:["市属重点"],tag:"医疗器械工程国家级特色，光学工程与上海光机所联合培养",by:"9.86%",sx:"44.5%",ap:["医疗器械工程"],job:"国药、联影医疗、西门子医疗；光学工程与中科院上海光机所联培",life:"军工路新旧宿舍并存；复兴路中外合作区"},
+      {n:"上海海事大学",lv:["市属重点"],tag:"航运、物流、海商法全国领先，中远海运校招大户",by:"8.13%",sx:"36.1%",ap:["航海技术","物流管理"],job:"中远海运、上港集团、中国船级社；航运金融、海商法对应海事法院、航运保险",life:"临港 4 人间空调独卫阳台；海馨麻辣烫、清真大盘鸡面"},
+      {n:"上海海洋大学",lv:["双一流"],tag:"水产养殖全国第一，双一流建设高校",by:"12%",sx:"35.2%",ap:["水产"],job:"光明渔业、沿海水产研究所；食品科学进光明乳业、梅林罐头",life:"临港 4 人间上床下桌独卫，毗邻滴水湖"},
+      {n:"上海电力大学",lv:["市属重点"],tag:"原电力部属院校，国网上海录用人数常年第一",by:"1.82%",sx:"24.53%",ap:["电气工程"],job:"国网上海市电力公司，电气毕业生超 1/3 进电网系统",life:"临港宿舍好；杨浦老旧但市区"},
+      {n:"上海应用技术大学",lv:["公办本科"],tag:"全国唯一香料香精技术专业，「小众王牌」壁垒极强",by:"1.9%",sx:"17%",ap:["香料香精技术"],job:"爱普香料、上海家化、华宝香精；制药工程进上海医药系统",life:"奉贤上床下桌 4 人间"},
+      {n:"上海工程技术大学",lv:["公办本科"],tag:"城市轨道交通学院与申通地铁共建，对接上海地铁系统",by:"1.7%",sx:"15.1%",ap:["车辆工程(轨道)","交通运输"],job:"上海地铁各运营维保公司；国航、东航地面管理岗",life:"松江 4 人间空调独卫"},
+      {n:"上海对外经贸大学",lv:["公办本科"],tag:"上海外贸系统「黄埔军校」，国贸、商务英语、审计特色",by:"7.04%",sx:"34.5%",ap:["国际贸易","商务英语"],job:"东方国际集团、进出口商会国企、四大报关税务；农商行、中行、浦发",life:"松江大学城 4 人间上床下桌"},
+      {n:"上海师范大学",lv:["市属重点"],tag:"教师教育特色综合大学，上海基础教育师资培养主阵地",by:"5.52%",sx:"24.4%",ap:["中国语言文学","马克思主义理论"],job:"全市中小学教师校友占比高，教师招聘统考认可度高",life:"徐汇市中心；奉贤设施较新"},
+      {n:"上海立信会计金融学院",lv:["公办本科"],tag:"会计、金融、审计应用型财经，「立信系」遍及上海银行体系",by:"暂无推免",sx:"24.2%",ap:["会计学","金融学"],job:"银行、券商营业部、中国银联；500 分左右进银行体系效率高",life:"松江宿舍好；浦东一般"},
+      {n:"上海第二工业大学",lv:["公办本科"],tag:"应用型工业大学，机械自动化与上汽、振华重工长期合作",by:"暂无推免",sx:"11.5%",ap:["机械工程","自动化"],job:"上汽集团、振华重工；智能科学对接浦东人工智能产业链",life:"浦东 4 人间独卫空调"},
+      {n:"上海电机学院",lv:["公办本科"],tag:"上海电气集团校招重点生源，电气（风电方向）",by:"暂无推免",sx:"14.7%",ap:["电气工程(风电)"],job:"上海电气风电集团、特斯拉上海超级工厂",life:"临港 4 人间上床下桌"},
+      {n:"上海商学院",lv:["公办本科"],tag:"财经类公办本科，工商管理、会计、酒店管理特色",by:"暂无推免",sx:"11%",ap:["工商管理","会计学"],job:"面向零售、餐饮、酒店集团基层管理岗，就业面稳定",life:"主校区奉贤"},
+      {n:"上海政法学院",lv:["公办本科"],tag:"政法类公办本科，法学（监狱学、人民调解）特色",by:"暂无推免",sx:"30.1%",ap:["法学"],job:"法院书记员、公安文职、基层人民调解等体制内对口岗",life:"青浦，法学图书馆资源丰富"},
+      {n:"上海健康医学院",lv:["公办本科"],tag:"应用型医科，沪上三甲护理、影像、康复主要来源校",by:"暂无推免",sx:"9.6%",ap:["护理学"],job:"瑞金、中山、华山等三甲医院；护理年毕业超 800 人，护士证后三甲必招",life:"周浦 4 人间上床下桌独卫"}],
+    mbDesc:"民办的价值在于拿本科学历 + 依托上海城市资源。学费普遍 3–5 万元/年，填报前需权衡投入产出。",
+    mb:[{n:"上海中侨职业技术大学",d:"唯一民办职业本科，护理、大数据会计、智能制造，压线考生的保底本科选择"},{n:"上海杉达学院",d:"办学历史长、管理规范，会计、金融、酒店管理、计算机有教学实力"},{n:"上海建桥学院",d:"民办中工科突出，计算机、机械、宝石材料、学前教育为优势"},{n:"上外贤达经济人文学院",d:"独立学院，依托上外师资，语言类有特色"},{n:"上海师范大学天华学院",d:"独立学院，学前教育、小学教育特色，适合目标教育行业"}],
+    zkDesc:"专科核心打法：盯紧「订单班」和行业定向培养，与国企或龙头签订协议，毕业即就业。",
+    zk:[["院校","特色专业","对接企业 / 行业"],["上海交通职业技术学院","城市轨道车辆应用技术、新能源汽车技术","申通地铁订单班（直接进地铁）、上汽、特斯拉"],["上海民航职业技术学院","飞机机电设备维修、空中乘务、民航运输","东航、上航、吉祥航空校招专场"],["上海旅游高等专科学校","酒店管理、旅游管理、空中乘务","携程、锦江国际、迪士尼、东航订单培养"],["上海城建职业学院","建筑工程技术、工程造价、古建筑工程技术","上海建工、隧道股份等建筑国企"],["上海出版印刷高等专科学校","印刷媒体技术、数字出版","中国出版集团、上海印刷集团实训基地"],["上海电子信息职业技术学院","通信技术、软件技术、智能控制","中国电信上海公司、中兴通讯"],["上海工艺美术职业学院","工艺美术品设计、数字媒体艺术","老凤祥、老庙黄金设计部门、文创企业"],["上海农林职业技术学院","动物医学、园艺技术、生物技术","连锁宠物医院、药明康德等 CRO 企业"],["上海现代化工职业学院","应用化工技术、分析检验技术","上海华谊集团、巴斯夫、科思创"],["上海科创职业技术学院","工业机器人技术、智能控制","松江 G60 科创走廊、发那科、库卡机器人"],["上海科学技术职业学院","机电一体化、通信技术","上汽大众、上汽乘用车订单班"],["上海南湖职业技术学院","护理、数字媒体技术","上海市第四人民医院、虹口社区卫生中心"],["上海建设管理职业技术学院","市政工程技术、园林技术","市住建委、城市更新、旧住房改造项目"]],
+    zkNote:"空中乘务、民航类需面试并满足身高体检条件；护理类考取护士资格证后进入公立医院体系比例高。",
+    soeDesc:"上海汇聚宝武、中远海运、中国船舶、中国电气装备、中国商飞等央企总部及上汽、上海电气等地方国企。",
+    soe:[["院校","对口专业","对接央国企 / 行业"],["复旦大学 / 上海交大","临床医学、计算机、金融","国家卫健委、央行、券商、TOP 药企、计算机大厂"],["同济大学","土木、车辆工程","上海大众、上海建工、中国商飞"],["东华大学","服装设计、材料科学","东方国际、中国纺织、上海纺织、阿里、腾讯"],["华东理工大学","化学工程、材料","华谊集团、中石化上海赛科、上海电气"],["上海财经大学","会计学、金融学","四大 AMC、国有银行总部、申能集团、四大上海分所"],["上海外国语大学","语言类","上海外服、外交系统、上汽（海外市场）"],["上海大学","机械工程（机器人）、微电子","上汽集团、上海微电子"],["上海理工大学","医疗器械、光学","联影医疗、中国医疗器械有限公司（国药旗下）"],["上海海事大学","航海技术、物流管理","中远海运（校招大户）、上港集团"],["上海海洋大学","水产养殖","光明渔业、上海市水产研究所"],["上海应用技术大学","香料香精","上海家化"],["上海电力大学","电气工程","国网上海市电力公司（录用人数常年第一）"],["上海电机学院","电气、机械（风电）","上海电气集团、特斯拉（中国）"],["上海第二工业大学","机械、自动化","上汽集团、振华重工"],["上海健康医学院","护理、医械","瑞金医院、中山医院等沪上三甲"],["上海电子信息职业技术学院","通信技术","中国电信上海公司、中兴通讯"]],
+    strat:[
+      {ic:"企",bg:"#4f6ef7",t:"想进央国企 / 体制内",paths:[["电网系统","上海电力大学电气工程 — 国网上海录用人数常年全市第一"],["航运系统","上海海事大学航海技术、物流管理 — 中远海运校招大户、上港集团、中国船级社对口"],["地铁系统","上海工程技术大学城市轨道交通学院 — 与申通地铁共建，毕业直接进运营维保"],["金融财经","上财（四大与机构总部）、立信（银行基层+银联）、上对外经贸（外贸国企+四大税务）"],["装备制造","电机（上海电气校招重点）、二工大（上汽、振华重工）、同济/交大（商飞、中船首选）"],["化工医药","华东理工大学 — 中石化上海赛科、华谊集团、上药集团"],["政法系统","华东政法大学法学 — 法院、检察院、纪委监委招录大户"]]},
+      {ic:"师",bg:"#2fbf71",t:"想当老师（带编分配）",paths:[["最优路径","华东师大公费师范生（提前批）— 免学费住宿费、定向回沪各区任教、带事业编"],["性价比之选","上海师范大学 — 市属师范主力，教师招聘统考认可度高，录取分远低于华师大公费师范"]]},
+      {ic:"医",bg:"#e5484d",t:"想学医",paths:[["高分段","复旦上海医学院、交大医学院（八年制临床，两校综评招生并驾齐驱）"],["中分段","海军军医大学无军籍学员 — 比复交医低 50–80 分，附属医院住培对接优先"],["应用型","上海健康医学院护理学 — 年毕业超 800 人，护士证后三甲必招"]]},
+      {ic:"稳",bg:"#e67e22",t:"中分段性价比院校",paths:[["物理类","上理工（医疗器械→联影）、上海海事（中远海运）、上电（电网）、上工程（申通地铁）、电机（上海电气）"],["历史类 450 分左右","可稳定就读上海商学院、上海政法学院等公办本科"],["500 分进银行","上海立信会计金融学院，金融会计就业效率非常高"]]},
+      {ic:"省",bg:"#8a93a6",t:"省外考生特别提醒",paths:[["实习前置","考进上海名校，大三必须提前规划实习 — 实习是获取留用 offer 的重要手段"],["民办学费","非 985/211 低分段（学费 3–5 万/年）需慎重权衡"],["专科订单班","交通职院轨道、民航职院维修空乘、城建职院建筑等就业率常年较高"]]}],
+    dormDesc:"上海高校宿舍近年普遍 4 人间、空调独卫标配，新建校区（临港、松江、奉贤、张江）整体优于市区老校区。",
+    dorm:[["院校","宿舍","食堂"],["复旦大学","邯郸南区公寓为主，部分新楼独卫；张江 4 人间独卫空调","邯郸「旦苑」两层美食城，清真食堂口碑好"],["上海交通大学","闵行 4 人间空调独卫，校园大需自行车","号称上海高校最好吃，玉兰苑、哈乐餐厅物美价廉"],["同济大学","四平路 4 人间老建筑；嘉定上床下桌+阳台","学苑食堂红烧大排一绝，沪上网红食堂"],["华东师范大学","闵行新公寓 4 人间独卫空调阳台；中北老旧但交通便利","华闵「金拱门网红餐厅」，夏雨厅拉面一绝"],["上海财经大学","国定路 4 人间上床下桌，空调独卫阳台","绿叶餐厅、第一食堂口碑良好"],["上海外国语大学","松江大学城 4 人间上床下桌独卫空调","文汇路美食街是主觅食地"],["华东理工大学","奉贤 4 人间独卫空调；徐汇较老部分翻新","奉贤食堂选择多，性价比高"],["东华大学","松江 4 人间空调独卫；延安路部分公共卫浴","松江一食堂口碑不错，二食堂金拱门自选餐"],["上海大学","宝山 4 人间空调独卫阳台；延长校区分散","尔美网红餐厅，山明、水秀、吾馨种类多"],["上海科技大学","2 人间上床下桌，中央空调独卫，全市天花板","小而精，周边张江配套方便"],["上海理工大学","军工路新老宿舍并存；复兴路中外合作区","军工路校区食堂便利"],["上海海事大学","临港 4 人间空调独卫阳台，周边商业成熟","海馨二楼麻辣烫、清真大盘鸡面评价高"],["上海海洋大学","临港 4 人间上床下桌独卫","临港校区食堂平价"],["上海电力大学","临港 4 人间空调独卫；杨浦老旧但交通方便","临港校区食堂较新"],["上海工程技术大学","松江 4 人间空调独卫；长宁较老","松江校区食堂种类齐全"],["上海应用技术大学","奉贤上床下桌 4 人间；徐汇部分旧","奉贤校区食堂口碑好"],["上海健康医学院","周浦 4 人间上床下桌独卫（新楼）","浦东校区生活配套便利"]]},
+
+  guangdong:{name:"广东",desc:"全国经济第一大省，9 个万亿级产业集群。从华为、腾讯、比亚迪到南方电网、广东烟草，产业底盘决定了广东高校毕业生「岗位多、薪酬高」的就业纵深。",
+    stats:[{v:"9 个",k:"万亿级产业集群"},{v:"503 人",k:"华工进南网(全国第一)"},{v:"320 人",k:"广工进南网(全国第二)"},{v:"6 所",k:"中外合作办学高校"}],
+    indusTitle:"广东产业：十大战略性支柱产业集群",indusDesc:"省政府培育十大战略性支柱产业集群（单个产值 5000 亿元以上），是高校专业布局与校招需求的主战场。",
+    indusLayers:[{title:"战略性新兴产业 · 新增万亿赛道",color:"#0ea5a0",items:[{n:"新能源汽车与智能网联汽车",s:"比亚迪、小鹏、广汽埃安"},{n:"集成电路",s:"粤芯、华为海思、比亚迪半导体"},{n:"低空经济与商业航天",s:"深圳低空经济中心"},{n:"人工智能与具身智能",s:"华为、腾讯、商汤"}]}],
+    regionTitle:"十大战略性支柱产业集群",regionDesc:"龙头与对口高校专业对照。",
+    region:[["产业集群","核心布局地","龙头 / 代表企业","对口高校 / 专业"],["新一代电子信息","深圳、东莞、惠州","华为、中兴、OPPO、vivo、TCL","哈工大(深圳)、华工电信/电子"],["绿色石化","惠州、茂名、湛江","中海油惠州炼化、中石化茂名石化","广东石油化工学院"],["智能家电","佛山、珠海","美的、格力","华工机械/自动化、广工机电"],["智能网联新能源汽车","广州、深圳","比亚迪、小鹏、广汽集团","华工车辆工程、深大汽车电子"],["先进材料","佛山、云浮","金发科技、联塑","华工材料科学、广工高分子材料"],["软件与信息服务","深圳、广州","腾讯(深圳)、网易(广州)","哈工大(深圳)软件、中大计算机"],["超高清视频显示","广州、深圳","创维、康佳、TCL华星光电","深大光电、华工显示技术"],["生物医药与健康","广州、深圳、珠海","广药集团、华大基因、丽珠医药","南方医科临床/药学、暨南生物"],["现代农业与食品","湛江、江门","温氏食品、海天味业","华南农大食品科学/农学"]],
+    regionNote:"「十五五」核心方向：新一代电子信息与 AI、半导体与集成电路、新能源汽车与低空经济、生物医药与健康、海洋经济与现代农业。",
+    topDesc:"共 10 所，覆盖广东全部 985、211 及「双一流」建设高校（含异地校区与新型研究型大学）。",
+    top:[
+      {n:"哈尔滨工业大学(深圳)",lv:["985","211","双一流"],tag:"C9 联盟哈工大的粤港澳大湾区核心校区，工科全国顶尖，录取门槛常年居广东物理类之首",by:"27.78%",sx:"58.41%",ap:["机械工程","力学","材料科学与工程","环境科学与工程"],job:"华为、腾讯、中兴、比亚迪深圳总部研发岗优先高校；南方电网核心生源",life:"深圳大学城 4 人间上床下桌独卫空调，24h 热水 WiFi"},
+      {n:"中山大学",lv:["985","211","双一流"],tag:"华南最高学府，工商/公共/生态学前列，临床医学、计算机省内领跑",by:"29.5%",sx:"68.63%",ap:["工商管理学","公共管理学","生态学"],job:"附一院、孙逸仙等华南顶级三甲；华为腾讯研发第一方阵；广东烟草职能岗首选",life:"广州三校园 4 人间上床下桌，深圳校区新楼"},
+      {n:"华南理工大学",lv:["985","211","双一流"],tag:"广东学子首选 985，轻工技术与工程全国第一，工科全面强劲",by:"24.2%",sx:"46.3%",ap:["轻工科学与技术"],job:"南方电网 2025 录用 503 人全国第一；广汽、比亚迪、小鹏；广东中烟业务岗",life:"五山 4 人间空调独卫；「华南吃饭大学」"},
+      {n:"北京师范大学(珠海校区)",lv:["985","211","双一流"],tag:"北师大异地校区，学历学位与本部一致，公费师范生定向广东带编任教",by:"39.24%",sx:"—",ap:["中国语言文学","戏剧与影视学","中国史","教育学","马克思主义理论","心理学","地理学"],job:"公费师范生直接带编分配珠三角中小学；教育系统、心理健康机构需求旺",life:"山海之间现代化公寓 4 人间，空调独卫热水"},
+      {n:"暨南大学",lv:["211","双一流"],tag:"华侨最高学府，新闻传播、应用经济学、药学实力雄厚，国际化特色鲜明",by:"10.63%",sx:"36.5%",ap:["新闻传播学","工商管理学"],job:"新闻出版、金融机构认可度高；附属第一医院；广东烟草职能岗对口",life:"石牌、番禺、珠海多校区 4 人间上床下桌"},
+      {n:"华南师范大学",lv:["211","双一流"],tag:"广东中小学教师培养绝对龙头，心理学全国最前列",by:"10.21%",sx:"30.6%",ap:["心理学"],job:"提前批教师专项带编分配各市县；心理教育岗位需求旺",life:"石牌、大学城、南海 4 人间上床下桌空调独卫"},
+      {n:"南方科技大学",lv:["双一流"],tag:"新型研究型大学，全员书院制，综合评价录取",by:"32.8%",sx:"78.1%",ap:["（未参评）"],job:"深造率全国前列；华为深莞研发中心受青睐；海外深造比例高",life:"书院制 4 人间上床下桌空调独卫，中西风味食堂"},
+      {n:"华南农业大学",lv:["双一流"],tag:"农林九校之一，植物学动物学 ESI 全球前 1‰，兽医学前列",by:"8.64%",sx:"24.9%",ap:["农业工程","畜牧学","兽医学"],job:"广东中烟食品岗对口；华南宠物医疗领军；省农业系统",life:"天河五山 4-6 人间空调，紫荆花季闻名"},
+      {n:"广州中医药大学",lv:["双一流"],tag:"「中医老四校」之一，中医学、中药学、针灸推拿华南领先",by:"10.1%",sx:"34.1%",ap:["中西医结合"],job:"广东省中医院等三甲；广药、香雪制药；中医药海外传播特色",life:"大学城、三元里 4-6 人间空调热水"},
+      {n:"广州医科大学",lv:["双一流"],tag:"呼吸病学全国闻名，钟南山院士团队坐镇",by:"18.3%",sx:"50.6%",ap:["临床医学"],job:"附一院等三甲竞争力强；呼吸学科方向全国第一",life:"番禺新校区 4 人间上床下桌空调独卫"}],
+    otherDesc:"共 33 所，覆盖省属重点、应用型强校、地市公办本科与新办高校。",
+    other:[
+      {n:"深圳大学",lv:["省属重点"],tag:"马化腾母校，与腾讯、华为、中兴同处一城，录取热度常年居高",by:"6.87%",sx:"32.3%",ap:["光学工程"],job:"中通服、中移铁通重点生源；腾讯、华为、中兴人数众多",life:"粤海、丽湖 4 人间上床下桌空调独卫"},
+      {n:"广东工业大学",lv:["省重点"],tag:"广东制造业人才摇篮，南方电网校招「性价比之王」",by:"5.62%",sx:"24.8%",ap:["控制科学与工程"],job:"南方电网 2025 录用 320 人全国第二；广汽、比亚迪、小鹏",life:"大学城 4 人间上床下桌空调独卫"},
+      {n:"南方医科大学",lv:["国重点"],tag:"全国首批八年制临床医学 8 校之一，医学实力稳居华南前列",by:"14.3%",sx:"53%",ap:["基础医学","公共卫生与预防医学","中西医结合"],job:"南方医院、珠江医院体系及珠三角三甲",life:"广州本部 4-8 人间空调；顺德校区环境优美"},
+      {n:"广东外语外贸大学",lv:["省重点"],tag:"华南外语语种最齐全，「外语六校」之一，跨境电商标杆",by:"5.62%",sx:"28.1%",ap:["外国语言文学"],job:"SHEIN、Temu 等跨境电商头部及外贸国企；涉外央企",life:"白云山脚 4-6 人间空调热水"},
+      {n:"广州大学",lv:["省属重点"],tag:"土木、统计、教育见长，教师专项稳进珠三角教师编",by:"4.21%",sx:"21.5%",ap:["土木工程"],job:"广州建筑集团、广东建工；教师专项带编",life:"大学城 4 人间上床下桌空调独卫"},
+      {n:"汕头大学",lv:["省部共建"],tag:"李嘉诚基金会共建，医学院突出，国际化特色鲜明",by:"5.9%",sx:"30.4%",ap:["数学","生物学","临床医学"],job:"附院及粤东三甲；潮汕公务员、企事业单位认可度高",life:"桑浦山 4 人间上床下桌空调独卫，东海岸新校区"},
+      {n:"广东财经大学",lv:["省属"],tag:"财税、金融、烟草系统财会法务岗「人才流水线」",by:"2%",sx:"12%",ap:["法学","工商管理"],job:"广东烟草财务岗优质生源；国有银行广东分行",life:"海珠、三水 4-6 人间空调"},
+      {n:"东莞理工学院",lv:["省市共建"],tag:"与松山湖高新区分产教融合的应用型理工强校",by:"暂无推免",sx:"—",ap:["（未参评）"],job:"华为、OPPO、vivo 松山湖基地重要聘用来源",life:"松山湖 4 人间上床下桌空调独卫，紧邻华为"},
+      {n:"佛山大学",lv:["省市共建"],tag:"佛山唯一公办综合大学，智能制造、机器人对接家电装备产业",by:"1.95%",sx:"13.8%",ap:["（未参评）"],job:"美的、格兰仕校招；佛山陶瓷与建陶产业",life:"江湾、仙溪 4-6 人间空调热水"},
+      {n:"广东技术师范大学",lv:["省属"],tag:"「双师型」职教师资特色，职业院校师资培养基地",by:"暂无推免",sx:"—",ap:["（未参评）"],job:"全省中职、高职任教；珠三角 IT 与制造业",life:"广州东西校区、河源 4-6 人间空调"},
+      {n:"广东海洋大学",lv:["省属"],tag:"南海周边海洋水产人才培养基地，水产、海洋科学特色",by:"2.2%",sx:"15.8%",ap:["食品科学与工程","水产"],job:"广东渔业系统、水产集团；航运企业",life:"湛江湖光岩畔 4-6 人间空调热水"},
+      {n:"广东医科大学",lv:["省属"],tag:"粤西医药主力，临床、麻醉、检验、护理输送区域医疗人才",by:"暂无推免",sx:"—",ap:["临床医学"],job:"湛江、东莞、深圳三甲；农村卫生专项带编",life:"湛江、东莞 4-6 人间空调"},
+      {n:"深圳技术大学",lv:["深圳市属"],tag:"借鉴德国应用科学大学模式，对接深圳先进制造与高新产业",by:"暂无推免",sx:"—",ap:["（未参评）"],job:"深圳先进制造、ICT 企业；深圳地铁与新能源汽车产业链",life:"坪山新校区 4 人间上床下桌空调独卫"}],
+    otherBrief:[
+      {n:"五邑大学",d:"江门唯一公办本科，纺织工程、机械、电子信息特色，对接珠西制造业"},{n:"广东金融学院",d:"原央行主管，华南金融人才培养重镇"},{n:"惠州学院",d:"师范输送教师，电子信息、化工服务惠州产业"},{n:"广州航海学院",d:"原交通部，华南唯一航海类本科"},{n:"广东药科大学",d:"华南药学高地，对接广药集团、药检系统"},{n:"广东石油化工学院",d:"省部共建、原石油工业部，石化就业定向通道"},{n:"肇庆学院",d:"师范与应用型并重，公办保底热门"},{n:"岭南师范学院",d:"粤西师范龙头，公费师范生计划量大"},{n:"韩山师范学院",d:"粤东师范主力，潮汕教育系统认可度高"},{n:"仲恺农业工程学院",d:"农学、食品、园艺对接省农业系统"},{n:"韶关学院",d:"粤北师范与医学主力"},{n:"嘉应学院",d:"梅州市属综合本科，师范服务粤东基础教育"},{n:"肇庆医学院",d:"2024 新升公办本科，服务粤西基层医疗"},{n:"广东第二师范学院",d:"广州花都，进珠三角中小学及幼教"},{n:"深圳理工大学",d:"2025 首招新型研究型大学，依托中科院深圳先进院"},{n:"大湾区大学",d:"东莞松山湖新建公办，聚焦物质科学、先进工程"}],
+    mbDesc:"广东共 24 所民办本科（含 2 所民办职业本科）。本科线附近若目标是就业，公办专科订单班往往比民办本科更划算。",
+    mb:[
+      {n:"珠海科技学院",d:"原吉大珠海学院，办学条件生源居广东民办前列"},{n:"电子科技大学中山学院",d:"依托电子科大品牌，电子信息、通信、计算机"},{n:"广外南国商学院",d:"依托广外品牌，外语、国贸、会计"},{n:"广州城市理工学院",d:"原华工广州学院，车辆、机械、土木"},{n:"广州新华学院",d:"原中大新华学院，护理学就业好，电气进南网民办第一"},{n:"广州南方学院",d:"原中大南方学院，经济学、会计学"},{n:"广东白云学院",d:"广州老牌民办，会计、计算机建设较好"},{n:"广东东软学院",d:"IT 特色民办，软件、大数据、数媒"},{n:"广州软件学院",d:"软件、网络工程、游戏开发为特色"},{n:"广东培正学院",d:"会计、英语、法学有积累"},{n:"广东科技学院",d:"东莞工科民办，紧贴东莞制造业"},{n:"广州理工学院",d:"车辆工程、土木工程有产教订单合作"},{n:"广州应用科技学院",d:"肇庆校区，应用型专业为主"},{n:"广州华商学院",d:"财经类民办，会计、金融、管理"},{n:"东莞城市学院",d:"原东莞理工城市学院，机械、电子、计算机"},{n:"广州工商学院",d:"财经管理类民办，会计就业不错"},{n:"广州华立学院",d:"原广工华立学院，电力、机械"},{n:"广东理工学院",d:"工科民办，对接肇庆制造业"},{n:"湛江科技学院",d:"原广东海大寸金学院，海洋、财经"},{n:"广州科技职业技术大学",d:"民办职业本科，技术技能型培养"},{n:"广东工商职业技术大学",d:"肇庆办学，商科与工科并重"},{n:"广东江门南粤学院",d:"服务珠西产业带，智能制造、经管"},{n:"广州商学院",d:"原华师增城学院，法学、会计、电商"}],
+    coopDesc:"广东有 6 所中外（港澳）合作办学高校，国际化培养、深造通道突出。",
+    coop:[
+      {n:"香港中文大学(深圳)",d:"学位与港中大一致，升学率居全省高校首位"},{n:"香港科技大学(广州)",d:"2022 设立，交叉学科枢纽式办学"},{n:"深圳北理莫斯科大学",d:"北理工与莫斯科大学合办，俄语+专业双轨"},{n:"北师香港浸会大学",d:"全英文教学，传媒、工商、计算机国际化"},{n:"广东以色列理工学院",d:"理工科全英文教学，小而精研究型"},{n:"香港城市大学(东莞)",d:"2024 设立，聚焦计算机、材料、生医工程"}],
+    zkDesc:"广东专科批次优质专业组和「三二分段专升本」投档热度持续攀升，部分热门组已超过本科线。",
+    zk:[["院校","核心专业","订单班 / 就业单位"],["深圳职业技术大学","电子信息、计算机、护理、智能制造","华为、腾讯、中兴、比亚迪深圳总部核心生源校"],["广州铁路职业技术学院","铁道机车、铁道车辆、铁道运营","中国铁路广州局、广州地铁、深圳地铁"],["广东轻工职业技术大学","轻工技术、食品生物、电商、艺术设计","广药集团、广州轻工工贸集团（市属国企）"],["深圳信息职业技术大学","软件技术、通信、云计算、大数据","华为、腾讯、中兴、深信服"],["广东食品药品职业学院","药学、中药学、护理、食品质量","广药集团、广州医药集团、省药检系统"],["广东机电职业技术学院","机电一体化、数控、汽车检测","广汽、比亚迪广州基地、广日电梯订单班"],["广东水利电力职业技术学院","供用电技术、水利水电建筑工程","南方电网基层、广东水利系统、中国电建"],["广东交通职业技术学院","道路桥梁、汽车、物流、轨道运营","广东交通集团、广州地铁、深圳巴士、中交四航局"],["广东邮电职业技术学院","通信技术、移动互联、大数据会计","中国电信广东、中国移动广东（运营商订单班）"],["广州民航职业技术学院","飞机机电维修、空中乘务、民航安全","南航广州基地、白云机场、国航深圳"],["广东司法警官职业学院","法律事务、司法警务、刑事侦查","法院书记员、监狱系统、司法社工"]],
+    zkNote:"职业本科（2025 新升格）：深圳职业技术大学、深圳信息职业技术大学、顺德职业技术大学、广东轻工职业技术大学、广州职业技术大学。",
+    soeDesc:"广东央国企招聘主阵地：南方电网、广东烟草、三大运营商、广汽、比亚迪、中石化茂名石化、广州铁路局、广州地铁等。",
+    soe:[["院校","对口央国企","对口专业"],["华南理工大学","南方电网(503人全国第一)、广东中烟、广汽、金发科技","电气、车辆、自动化、机械、材料"],["广东工业大学","南方电网(320人全国第二)、广东能源、广汽、三大运营商","电气、自动化、机械、计算机、化工"],["中山大学","南方电网、广东烟草(职能岗)、华为腾讯研发","计算机、法学、工商管理、临床医学"],["广东财经大学","广东烟草、广东中烟、国有银行广东分行","会计学、法学、税收学、金融学"],["华南农业大学","广东中烟、广东烟草(业务岗)、省农业系统","食品科学、农学、兽医学"],["深圳大学","中通服广东、中移铁通、腾讯、华为","计算机、软件工程、电子信息"],["广东外语外贸大学","中通服海外业务、涉外央企、外贸国企","国贸、商务英语、外语类"],["广州铁路职业技术学院","中国铁路广州局、广州地铁、深圳地铁","铁道机车、铁道车辆、铁道运营"],["广东水利电力职业技术学院","南方电网基层、广东水电集团、中国电建","供用电技术、水利水电建筑工程"],["广东邮电职业技术学院","中国电信广东、中国移动广东(订单班)","通信技术、移动互联、大数据"]],
+    strat:[
+      {ic:"企",bg:"#4f6ef7",t:"想进央国企",paths:[["高分段","华南理工电气、中山计算机/法学、华工车辆工程"],["中高分段","广工电气/自动化、华农食品/农学、广财会计/法学"],["中分段","广石化化工、东莞理工计算机/机械、佛大智能制造"]]},
+      {ic:"师",bg:"#2fbf71",t:"教师编制路线",paths:[["超稳路径","华南师大提前批教师专项毕业带编分配全省中小学"],["其他渠道","广州大学、岭南师范、韩山师范、广技师、广二师教师专项"]]},
+      {ic:"医",bg:"#e5484d",t:"想学医学",paths:[["高分段","中山临床、南方医科临床（八年制）"],["中分段","暨南、广州医科、广东医科临床医学"],["低分段带编","广州医科、广东医科、广东药科定向卫生专项，毕业分配县乡卫生院事业编"]]},
+      {ic:"稳",bg:"#e67e22",t:"公办压线保底",paths:[["物理类中段","岭南师范、肇庆学院、广石化、韩师、嘉应、韶关等地市公办"],["历史类","参照各校师范类专业"]]},
+      {ic:"专",bg:"#8a93a6",t:"专科紧盯订单班",paths:[["首选","广州铁路职院（铁路局订单班）、广东邮电职院（电信移动订单班）"],["其他","广东水利电力（南网基层）、深信大（华为腾讯地铁）、广东交通（路桥央企）"]]}],
+    dormDesc:"广东高校宿舍普遍 4 人间上床下桌、空调独卫标配，新建校区（深圳、珠海、松山湖）条件更优。",
+    dorm:[["院校","宿舍条件","食堂口碑"],["哈尔滨工业大学(深圳)","深圳大学城 4 人间上床下桌、独卫空调，24h 热水 WiFi","大学城多校共享食堂，品种丰富"],["中山大学","广州三校园多为 4 人间上床下桌、空调独卫，深圳校区新楼","各校区食堂齐全，南校园学一食堂口碑好"],["华南理工大学","五山 4 人间空调独卫居多，大学城上床下桌、公共厨房","「华南吃饭大学」，大学城食堂曾票选广东第一"],["北京师范大学(珠海校区)","山海之间现代化公寓 4 人间，空调独卫热水齐全","食堂条件好、价格适中"],["暨南大学","石牌、番禺、珠海多校区，4 人间上床下桌为主","石牌校区周边餐饮繁华，食堂性价比高"],["华南师范大学","石牌、大学城、南海 4 人间上床下桌、空调独卫","石牌临近天河商圈，食堂种类多"],["南方科技大学","书院制 4 人间上床下桌、空调独卫，设施现代","中西风味齐全，紧邻大学城资源共享"],["深圳大学","粤海、丽湖两校区 4 人间上床下桌、空调独卫","斋区、西南餐厅品种丰富，口碑好"],["广东工业大学","大学城 4 人间上床下桌、空调独卫","大学城食堂大而全，风味窗口齐备"],["广州大学","大学城 4 人间上床下桌、空调独卫","食堂数量多、价格实惠"],["广东外语外贸大学","白云山脚两校区 4-6 人间、空调热水齐全","岭南风味浓郁，周边商圈成熟"],["汕头大学","桑浦山 4 人间上床下桌、空调独卫","食堂条件好，依山傍海环境优美"]]}
+};
+
+/* ============ 模块2：专业解读 ============ */
+const MAJORS = [
+  {n:"计算机科学与技术",cat:"工学",one:"互联网/软件行业核心专业，需求量最大",learn:"编程语言、数据结构与算法、操作系统、计算机网络、数据库、人工智能",job:"互联网大厂、软件研发、算法工程师、人工智能、国企信息化",xk:"首选物理（部分要求化学）",fit:"逻辑思维强、喜欢写代码、数学不错",schools:["清华","北大","浙大","北航","华科","哈工大(深圳)","北邮"]},
+  {n:"临床医学",cat:"医学",one:"医生的培养路径，八年制最优",learn:"人体解剖、生理生化、内科学、外科学、妇产儿科学、诊断学",job:"三甲医院、基层医疗、医学研究",xk:"物理 + 化学（多数要求）",fit:"有耐心、抗压、愿长期投入（5+3 甚至更长）",schools:["协和","北大","复旦","上交","中山","华西","湘雅"]},
+  {n:"法学",cat:"法学",one:"考公考编、律师、法务的敲门砖",learn:"法理学、宪法、民法、刑法、诉讼法、商法",job:"公检法、律师、企业法务、公务员",xk:"不限",fit:"记忆力好、文字表达强、目标公考",schools:["人大","中国政法","北大","清华","华政","武大","西南政法"]},
+  {n:"金融学",cat:"经济学",one:"银行证券基金等金融行业核心专业",learn:"宏微观经济、货币银行、证券投资、公司金融",job:"银行、券商、基金、保险、监管机构",xk:"不限（部分要求物理）",fit:"数学好、对数字敏感、想进金融圈",schools:["北大","清华","人大","上财","央财","复旦","南开"]},
+  {n:"电气工程及其自动化",cat:"工学",one:"进国家电网的「硬通货」专业",learn:"电路、电机学、电力系统、继电保护、高电压技术",job:"国家电网、南方电网、发电集团、电气设备",xk:"物理",fit:"物理好、目标电网央企",schools:["华科","西安交大","清华","华北电力","上海电力","三峡大学"]},
+  {n:"机械设计制造及其自动化",cat:"工学",one:"制造业基础，对接汽车、装备、机器人",learn:"机械原理、机械设计、材料力学、控制工程、CAD",job:"汽车、装备制造、机器人、航空航天",xk:"物理",fit:"空间想象好、喜欢动手、目标制造业",schools:["上交","华科","清华","哈工大","湖南大学","燕山大学"]},
+  {n:"电子信息类",cat:"工学",one:"芯片、通信、智能硬件的基础专业",learn:"电路、信号与系统、通信原理、微电子、嵌入式",job:"华为、中兴、芯片设计、通信、消费电子",xk:"物理",fit:"物理好、想进 ICT 行业",schools:["电子科大","西电","清华","北大","东南大学","北邮"]},
+  {n:"汉语言文学",cat:"文学",one:"考编当老师、考公的热门文科专业",learn:"文学史、语言学、写作、古代/现当代文学",job:"中小学教师、公务员、媒体、编辑",xk:"不限",fit:"语文好、想当老师或考公",schools:["北师大","北大","华东师大","复旦","南大","华中师大"]},
+  {n:"药学",cat:"医学",one:"医药行业研发、生产、流通环节",learn:"药物化学、药理学、药剂学、药物分析",job:"药企研发、医院药房、药监、医药流通",xk:"物理 + 化学",fit:"化学好、想进医药行业",schools:["中国药科大学","北大","复旦","中山","川大"]},
+  {n:"会计学",cat:"管理学",one:"每个企业都需要的「万金油」商科",learn:"会计学原理、财务会计、审计、税法、财务管理",job:"会计师事务所、企业财务、银行、审计",xk:"不限",fit:"细心、数字敏感、求稳",schools:["厦大","上财","央财","东北财大","中南财经政法"]},
+];
+const CATS = ["全部","工学","医学","法学","经济学","文学","管理学"];
+const CAT_COLOR = {工学:"#2d6cdf",医学:"#e5484d",法学:"#8e44ad",经济学:"#e67e22",文学:"#0ea5a0",管理学:"#7f8c9b"};
+
+/* ============ 模块3/4 共用：院校库 + 分差算法 ============ */
+const SCHOOLS = [
+  {n:"清华大学",level:"985",type:"综合",physics:{score:690,rank:80},history:{score:660,rank:40},majors:["计算机","自动化","经济与金融","建筑"]},
+  {n:"北京大学",level:"985",type:"综合",physics:{score:688,rank:95},history:{score:658,rank:55},majors:["数学","法学","中文","临床医学"]},
+  {n:"国防科技大学",level:"985",type:"理工",physics:{score:642,rank:2100},history:{score:600,rank:1800},majors:["计算机","信息与通信","软件工程"]},
+  {n:"武汉大学",level:"985",type:"综合",physics:{score:635,rank:3600},history:{score:612,rank:1200},majors:["测绘","法学","新闻传播","计算机"]},
+  {n:"华中科技大学",level:"985",type:"理工",physics:{score:640,rank:2800},history:{score:605,rank:1500},majors:["机械","光电信息","临床医学","计算机"]},
+  {n:"中山大学",level:"985",type:"综合",physics:{score:630,rank:4800},history:{score:608,rank:1350},majors:["临床医学","工商管理","计算机"]},
+  {n:"湖南大学",level:"985",type:"综合",physics:{score:612,rank:9000},history:{score:598,rank:2000},majors:["土木工程","电气工程","金融学","计算机"]},
+  {n:"中南大学",level:"985",type:"综合",physics:{score:615,rank:8200},history:{score:596,rank:2100},majors:["材料","临床医学","交通运输","自动化"]},
+  {n:"华南理工大学",level:"985",type:"理工",physics:{score:620,rank:6500},history:{score:592,rank:2400},majors:["建筑学","软件工程","机械工程","食品"]},
+  {n:"中南财经政法大学",level:"211",type:"财经",physics:{score:586,rank:18000},history:{score:578,rank:3600},majors:["金融学","法学","会计学"]},
+  {n:"武汉理工大学",level:"211",type:"理工",physics:{score:592,rank:15500},history:{score:570,rank:4300},majors:["车辆工程","材料","船舶与海洋"]},
+  {n:"暨南大学",level:"211",type:"综合",physics:{score:594,rank:14800},history:{score:580,rank:3400},majors:["新闻传播","金融学","药学"]},
+  {n:"湖南师范大学",level:"211",type:"师范",physics:{score:580,rank:20000},history:{score:574,rank:4000},majors:["教育学","汉语言文学","数学"]},
+  {n:"南京师范大学",level:"211",type:"师范",physics:{score:584,rank:18800},history:{score:576,rank:3800},majors:["教育学","地理科学","心理学"]},
+  {n:"华南师范大学",level:"211",type:"师范",physics:{score:578,rank:21500},history:{score:572,rank:4200},majors:["心理学","教育学","物理学"]},
+  {n:"中国矿业大学",level:"211",type:"理工",physics:{score:575,rank:23000},history:{score:560,rank:5200},majors:["采矿工程","安全工程","电气工程"]},
+  {n:"湘潭大学",level:"双一流",type:"综合",physics:{score:560,rank:29000},history:{score:555,rank:5800},majors:["数学","法学","材料","计算机"]},
+  {n:"长沙理工大学",level:"一本",type:"理工",physics:{score:545,rank:35500},history:{score:538,rank:8200},majors:["电气工程","土木工程","交通运输"]},
+  {n:"湖南科技大学",level:"一本",type:"综合",physics:{score:538,rank:40000},history:{score:536,rank:8600},majors:["机械","采矿工程","经济学","汉语言文学"]},
+  {n:"湖南农业大学",level:"一本",type:"农林",physics:{score:528,rank:44500},history:{score:530,rank:9600},majors:["农学","动物科学","食品科学"]},
+  {n:"南华大学",level:"一本",type:"综合",physics:{score:524,rank:46000},history:{score:525,rank:11000},majors:["核工程","临床医学","机械工程"]},
+  {n:"中南林业科技大学",level:"一本",type:"农林",physics:{score:520,rank:48000},history:{score:522,rank:11800},majors:["林学","风景园林","会计学"]},
+  {n:"湖南中医药大学",level:"一本",type:"医药",physics:{score:525,rank:45500},history:{score:532,rank:9200},majors:["中医学","针灸推拿","中药学"]},
+  {n:"湖南工商大学",level:"一本",type:"财经",physics:{score:508,rank:54500},history:{score:520,rank:12300},majors:["会计学","金融学","工商管理"]},
+  {n:"吉首大学",level:"二本",type:"综合",physics:{score:500,rank:59000},history:{score:510,rank:14500},majors:["临床医学","民族学","计算机"]},
+  {n:"长沙学院",level:"二本",type:"综合",physics:{score:496,rank:61000},history:{score:505,rank:15800},majors:["土木工程","艺术设计","软件工程"]},
+  {n:"湖南理工学院",level:"二本",type:"理工",physics:{score:492,rank:63000},history:{score:500,rank:17000},majors:["机械","电子信息","化工"]},
+  {n:"湖南文理学院",level:"二本",type:"综合",physics:{score:486,rank:66000},history:{score:498,rank:17600},majors:["汉语言文学","数学","机械"]},
+  {n:"衡阳师范学院",level:"二本",type:"师范",physics:{score:484,rank:67000},history:{score:502,rank:16500},majors:["汉语言文学","数学","教育学"]},
+  {n:"湖南城市学院",level:"二本",type:"理工",physics:{score:478,rank:70000},history:{score:492,rank:19000},majors:["土木工程","城乡规划","给排水"]},
+  {n:"湘南学院",level:"二本",type:"综合",physics:{score:470,rank:74000},history:{score:486,rank:20500},majors:["护理学","临床医学","计算机"]},
+  {n:"邵阳学院",level:"二本",type:"综合",physics:{score:466,rank:76000},history:{score:484,rank:21000},majors:["机械","电气工程","汉语言文学"]},
+];
+function classify(diff){ if(diff>=-15&&diff<0)return"冲"; if(diff>=0&&diff<=10)return"稳"; if(diff>10&&diff<=35)return"保"; return null; }
+
+/* ============ 通用渲染工具 ============ */
+function renderTable(head, rows){ return `<div class="tbl-scroll"><table><thead><tr>${head.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>i===0?`<td><span class="school">${c}</span></td>`:`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
+function collegeCard(c, showAp){ const ap=(showAp&&c.ap&&c.ap.length)?`<div class="block"><div class="bt">王牌 / A+ 学科</div><div class="chips">${c.ap.map(x=>`<span class="chip">${x}</span>`).join("")}</div></div>`:""; return `<div class="college"><div class="head"><div class="name">${c.n}</div><div>${lvBadge(c.lv)}</div></div><div class="tagline">${c.tag||""}</div><div class="stats"><div class="stat"><div class="v">${c.by||"—"}</div><div class="k">保研率</div></div><div class="stat"><div class="v">${c.sx||"—"}</div><div class="k">升学率</div></div></div>${ap}${c.job?`<div class="block"><div class="bt">行业与企业对接</div><div class="bd">${c.job}</div></div>`:""}${c.life?`<div class="foot">${c.life}</div>`:""}</div>`; }
+function rankChart(top){ const arr=top.filter(c=>c.by&&c.by!=="暂无"&&c.by!=="暂无推免").map(c=>({n:c.n,v:parseFloat(c.by)})).sort((a,b)=>b.v-a.v); if(!arr.length)return""; const max=Math.max(...arr.map(a=>a.v)); const W=680,H=arr.length*30+12,px=132,pw=W-px-50; let el=""; arr.forEach((c,i)=>{const bw=Math.max(c.v/max*pw,3);const y=i*30+6;el+=`<text x="0" y="${y+16}" font-size="13" fill="#5a6478">${c.n}</text><rect x="${px}" y="${y}" width="${bw}" height="21" rx="6" fill="#5b7cff"></rect><text x="${px+bw+8}" y="${y+15}" font-size="13" font-weight="800" fill="#1f2430">${c.v}%</text>`;}); return `<svg viewBox="0 0 ${W} ${H}">${el}</svg><div class="tip">保研率越高，深造通道越宽（数据年份随校而异）。</div>`; }
+function renderStrat(d){ return d.strat.map(s=>`<div class="strat"><div class="st"><span class="ic" style="background:${s.bg}">${s.ic}</span>${s.t}</div><div class="paths">${s.paths.map(p=>`<div class="path"><span class="dir">${p[0]}</span><span class="txt">${p[1]}</span></div>`).join("")}</div></div>`).join(""); }
+function donut(data,colors){ const total=data.reduce((s,d)=>s+d.value,0); if(!total)return'<div style="color:#8a93a6;text-align:center;padding:20px">暂无数据</div>'; const R=76,C=2*Math.PI*R,cx=108,cy=98; let off=0,segs="",lg=""; data.forEach((d,i)=>{if(!d.value)return;const f=d.value/total,dash=f*C;segs+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${colors[i]}" stroke-width="24" stroke-dasharray="${dash} ${C-dash}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"></circle>`;lg+=`<div class="li"><span class="sw" style="background:${colors[i]}"></span>${d.label} · ${d.value}</div>`;off+=dash;}); return `<svg viewBox="0 0 216 196">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="24" font-weight="800" fill="#1f2430">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="12" fill="#8a93a6">匹配院校</text></svg><div class="legend">${lg}</div>`; }
+
+/* ============ 模块1 渲染 ============ */
+let M1_PROV="shanghai", M1_TAB="indus";
+function D(){ return DATA[M1_PROV]; }
+function renderProvSwitch(){ $("#provSwitch").innerHTML=Object.keys(DATA).map(k=>`<div class="prov-btn ${k===M1_PROV?'active':''}" onclick="setProv('${k}')">${DATA[k].name}</div>`).join(""); }
+function renderM1Title(){ $("#m1Title").innerHTML=`<div class="card" style="margin-bottom:16px;padding:16px 20px"><span style="font-size:15px;font-weight:800">${D().name}高校解读</span><span style="font-size:13px;color:var(--muted);margin-left:8px">${D().desc}</span></div>`; }
+function paneIndus(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>${d.indusTitle}</div><div class="sec-desc">${d.indusDesc}</div><div class="statstrip">${d.stats.map(s=>`<div class="s"><div class="v">${s.v}</div><div class="k">${s.k}</div></div>`).join("")}</div>${d.indusLayers.map(l=>`<div class="indus-layer"><span class="ih" style="background:${l.color}">${l.title}</span><div class="items">${l.items.map(it=>`<div class="indus-item">${it.n}${it.s?`<small>${it.s}</small>`:""}</div>`).join("")}</div></div>`).join("")}</div><div class="card"><div class="sec-title"><span class="bar"></span>${d.regionTitle}</div><div class="sec-desc">${d.regionDesc}</div>${renderTable(d.region[0],d.region.slice(1))}${d.regionNote?`<div class="note">${d.regionNote}</div>`:""}</div>`; }
+function paneTop(){ const d=D(); return `<div class="card" style="margin-bottom:16px"><div class="sec-title"><span class="bar"></span>主力院校 · 保研率一览</div><div class="sec-desc">${d.topDesc}</div><div>${rankChart(d.top)}</div></div><div class="grid">${d.top.map(c=>collegeCard(c,true)).join("")}</div>`; }
+function paneOther(){ const d=D(); const brief=d.otherBrief&&d.otherBrief.length?`<div class="brief-list">${d.otherBrief.map(b=>`<div class="brief"><b>${b.n}</b><div class="d">${b.d}</div></div>`).join("")}</div>`:""; return `<div class="card" style="margin-bottom:16px"><div class="sec-title"><span class="bar"></span>其他公办本科</div><div class="sec-desc">${d.otherDesc}</div></div><div class="grid">${d.other.map(c=>collegeCard(c,false)).join("")}</div>${brief}`; }
+function paneVoc(){ const d=D(); const coop=d.coop&&d.coop.length?`<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>中外（港澳）合作办学</div><div class="sec-desc">${d.coopDesc||""}</div><div class="mini-list">${d.coop.map(m=>`<div class="mini"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>`:""; return `<div class="card"><div class="sec-title"><span class="bar"></span>民办本科</div><div class="sec-desc">${d.mbDesc}</div><div class="mini-list">${d.mb.map(m=>`<div class="mini"><b>${m.n}</b><div class="d">${m.d}</div></div>`).join("")}</div></div>${coop}<div class="card" style="margin-top:16px"><div class="sec-title"><span class="bar"></span>高职 / 专科（订单班导向）</div><div class="sec-desc">${d.zkDesc}</div>${renderTable(d.zk[0],d.zk.slice(1))}${d.zkNote?`<div class="note">${d.zkNote}</div>`:""}</div>`; }
+function paneStrat(){ const d=D(); return `<div class="card">${renderStrat(d)}</div>`; }
+function paneSoe(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>院校专业 ↔ 央国企对照</div><div class="sec-desc">${d.soeDesc}</div>${renderTable(d.soe[0],d.soe.slice(1))}</div>`; }
+function paneDorm(){ const d=D(); return `<div class="card"><div class="sec-title"><span class="bar"></span>宿舍与食堂速览</div><div class="sec-desc">${d.dormDesc}</div>${renderTable(d.dorm[0],d.dorm.slice(1))}</div>`; }
+const M1_PANES={indus:paneIndus,top:paneTop,other:paneOther,voc:paneVoc,strat:paneStrat,soe:paneSoe,dorm:paneDorm};
+function renderM1(){ renderM1Title(); $("#m1Body").innerHTML=M1_PANES[M1_TAB](); }
+function setProv(k){ M1_PROV=k; document.querySelectorAll(".prov-btn").forEach(b=>b.classList.toggle("active",b.textContent===DATA[k].name)); renderM1(); }
+function setM1Tab(t){ M1_TAB=t; document.querySelectorAll("#m1Tabs .tab").forEach(x=>x.classList.toggle("active",x.dataset.t===t)); renderM1(); }
+
+/* ============ 模块2 渲染 ============ */
+let MAJ_CAT="全部";
+function renderMajCat(){ $("#majCat").innerHTML=CATS.map(c=>`<div class="tab ${c===MAJ_CAT?'active':''}" onclick="setMajCat('${c}')">${c}</div>`).join(""); }
+function renderMajors(){ const list=MAJ_CAT==="全部"?MAJORS:MAJORS.filter(m=>m.cat===MAJ_CAT); $("#majGrid").innerHTML=list.map(m=>`<div class="major"><div class="mh"><div class="mn">${m.n}</div><span class="cat" style="background:${CAT_COLOR[m.cat]||'#4f6ef7'}">${m.cat}</span></div><div class="one">${m.one}</div><div class="row"><b>学什么：</b><span class="v">${m.learn}</span></div><div class="row"><b>就业方向：</b><span class="v">${m.job}</span></div><div class="row"><b>选科要求：</b><span class="v">${m.xk}</span></div><div class="row"><b>适合谁：</b><span class="v">${m.fit}</span></div><div class="row"><b>代表院校：</b><div class="schools">${m.schools.map(s=>`<span>${s}</span>`).join("")}</div></div></div>`).join(""); }
+function setMajCat(c){ MAJ_CAT=c; renderMajCat(); renderMajors(); }
+
+/* ============ 模块3：梯度选校清单 ============ */
+let PICKED=[];
+function gResult(){ const sub=$("#gSubject").value, score=parseFloat($("#gScore").value)||0; const res=[]; SCHOOLS.forEach((s,idx)=>{const m=s[sub].score, diff=score-m, tier=classify(diff); if(tier)res.push({idx,n:s.n,level:s.level,type:s.type,m:m,rank:s[sub].rank,diff,tier});}); res.sort((a,b)=>b.diff-a.diff); return res; }
+function renderGradient(){ const res=gResult(); const c=res.filter(r=>r.tier==="冲").length,w=res.filter(r=>r.tier==="稳").length,b=res.filter(r=>r.tier==="保").length; $("#gKpi").innerHTML=`<div class="k" style="--c:#ff7a45"><div class="v">${c}</div><div class="l">冲 · 可冲击</div></div><div class="k" style="--c:#4f6ef7"><div class="v">${w}</div><div class="l">稳 · 较稳妥</div></div><div class="k" style="--c:#2fbf71"><div class="v">${b}</div><div class="l">保 · 保底</div></div>`; const cols=[["冲","#ff7a45",res.filter(r=>r.tier==="冲")],["稳","#4f6ef7",res.filter(r=>r.tier==="稳")],["保","#2fbf71",res.filter(r=>r.tier==="保")]]; $("#gCols").innerHTML=cols.map(([t,color,arr])=>`<div class="tier-col"><div class="tc-head" style="background:${color}"><span>${t}</span><span>${arr.length} 所</span></div><div class="tc-body">${arr.map(r=>`<label class="tier-item"><input type="checkbox" ${PICKED.includes(r.idx)?'checked':''} onchange="togglePick(${r.idx})"><span class="tn">${r.n}</span><span class="ts">${lvBadge([r.level])} ${r.m}分 · ${r.diff>0?'+'+r.diff:r.diff}</span></label>`).join("")||'<div style="color:#8a93a6;padding:12px;font-size:13px">无匹配院校</div>'}</div></div>`).join(""); renderGList(); }
+function togglePick(i){ const k=PICKED.indexOf(i); if(k>=0)PICKED.splice(k,1); else PICKED.push(i); renderGradient(); }
+function renderGList(){ const sub=$("#gSubject").value; $("#gCnt").textContent=`（已选 ${PICKED.length} 所）`; if(!PICKED.length){$("#gList").innerHTML='<div style="color:#8a93a6;font-size:13px;padding:8px 0">在上方清单里勾选院校，会自动汇总到这里。</div>';return;} const list=PICKED.map((idx,pos)=>{const s=SCHOOLS[idx],m=s[sub].score,diff=parseFloat($("#gScore").value||0)-m;return`<div class="tier-item" style="border-bottom:1px dashed var(--line)"><span style="color:#8a93a6;font-weight:700;width:22px">${pos+1}.</span><span class="tn">${s.n}</span><span class="ts">${s.level} · ${m}分 · ${diff>0?'+'+diff:diff} · ${s.majors.join("、")}</span></div>`;}).join(""); $("#gList").innerHTML=list; }
+function copyGList(){ if(!PICKED.length){alert("请先勾选院校");return;} const sub=$("#gSubject").value; const txt=PICKED.map((idx,pos)=>{const s=SCHOOLS[idx],m=s[sub].score,diff=parseFloat($("#gScore").value||0)-m;return`${pos+1}. ${s.n}（${s.level}）往年最低分${m}，分差${diff>0?'+'+diff:diff}，专业：${s.majors.join('、')}`;}).join("\n"); const full=`我的选校清单（模拟）\n\n${txt}`; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(full).then(()=>alert("已复制到剪贴板")).catch(()=>fallbackCopy(full)); } else { fallbackCopy(full); } }
+function fallbackCopy(text){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); alert("已复制到剪贴板"); }
+
+/* ============ 模块4：模拟志愿填报 ============ */
+function sResult(){ const sub=$("#sSubject").value, score=parseFloat($("#sScore").value)||0; const res=[]; SCHOOLS.forEach((s,idx)=>{const m=s[sub].score, diff=score-m, tier=classify(diff); if(tier)res.push({n:s.n,level:s.level,type:s.type,m:m,diff,tier});}); return res; }
+function renderSim(){ const res=sResult(), score=parseFloat($("#sScore").value)||0; const c=res.filter(r=>r.tier==="冲"),w=res.filter(r=>r.tier==="稳"),b=res.filter(r=>r.tier==="保"); const chongMax=c.length?c.reduce((a,b)=>b.m>a.m?b:a):null; $("#sKpi").innerHTML=`<div class="k" style="--c:#4f6ef7"><div class="v">${res.length}</div><div class="l">匹配院校数</div></div><div class="k" style="--c:#ff7a45"><div class="v">${c.length}</div><div class="l">冲 · 可冲击</div></div><div class="k" style="--c:#4f6ef7"><div class="v">${w.length}</div><div class="l">稳 · 较稳妥</div></div><div class="k" style="--c:#2fbf71"><div class="v">${b.length}</div><div class="l">保 · 保底</div></div><div class="k" style="--c:#e67e22"><div class="v">${chongMax?chongMax.m:'-'}</div><div class="l">可冲最高分</div></div>`; const tierData=["冲","稳","保"].map(t=>({label:t,value:res.filter(r=>r.tier===t).length})); const tierColors=["#ff7a45","#4f6ef7","#2fbf71"]; const lvlMap={}; const LEVELS=["985","211","双一流","一本","二本"]; LEVELS.forEach(l=>lvlMap[l]=0); res.forEach(r=>{if(lvlMap[r.level]!=null)lvlMap[r.level]++;}); const lvlData=LEVELS.map(l=>({label:l,value:lvlMap[l]})); const lvlColors={985:"#e5484d",211:"#8e44ad","双一流":"#e67e22","一本":"#2d6cdf","二本":"#7f8c9b"}; $("#sViz").innerHTML=`<div class="viz-box col-6"><h3>冲 · 稳 · 保 梯度分布</h3>${donut(tierData,tierColors)}</div><div class="viz-box col-6"><h3>院校层次分布</h3>${donut(lvlData,LEVELS.map(l=>lvlColors[l]))}</div>`; }
+
+/* ============ 模块切换 ============ */
+function switchMod(m){ document.querySelectorAll(".mod-btn").forEach(b=>b.classList.toggle("active",b.dataset.mod===m)); document.querySelectorAll(".mod").forEach(s=>s.classList.remove("active")); $("#mod-"+m).classList.add("active"); window.scrollTo({top:0,behavior:"smooth"}); }
+
+/* ============ 绑定 & 启动 ============ */
+function bind(){
+  document.querySelectorAll(".mod-btn").forEach(b=>b.addEventListener("click",()=>switchMod(b.dataset.mod)));
+  document.querySelectorAll("#m1Tabs .tab").forEach(t=>t.addEventListener("click",()=>setM1Tab(t.dataset.t)));
+  $("#gGo").addEventListener("click",renderGradient);
+  $("#gCopy").addEventListener("click",copyGList);
+  $("#gClear").addEventListener("click",()=>{PICKED=[];renderGradient();});
+  $("#sGo").addEventListener("click",renderSim);
+  $("#gSubject").addEventListener("change",renderGradient);
+  $("#sSubject").addEventListener("change",renderSim);
+}
+renderProvSwitch(); renderM1(); renderMajCat(); renderMajors(); renderGradient(); renderSim(); bind();
+</script>
+</body>
+</html>
